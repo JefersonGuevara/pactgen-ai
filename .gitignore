@@ -1,0 +1,7 @@
+target/
+.idea/
+*.iml
+.vscode/
+examples/spike-consumer/src/test/java/pactgen/
+examples/spike-consumer/pactgen/
+pactgen/

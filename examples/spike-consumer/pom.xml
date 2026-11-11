@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Proyecto consumidor mínimo para el spike I0: aquí PactGen-AI escribe las pruebas generadas
+  (src/test/java/pactgen/generated) y `mvn test` produce los contratos en target/pacts.
+  Es independiente del build de la herramienta (no es un módulo del pom padre).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>dev.pactgen.examples</groupId>
+  <artifactId>spike-consumer</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <pact.version>4.6.17</pact.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>au.com.dius.pact.consumer</groupId>
+      <artifactId>junit5</artifactId>
+      <version>${pact.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.11.3</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <systemPropertyVariables>
+            <pact.rootDir>${project.build.directory}/pacts</pact.rootDir>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

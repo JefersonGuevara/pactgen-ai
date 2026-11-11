@@ -1,0 +1,189 @@
+openapi: 3.0.3
+info:
+  title: customers-service (spring-petclinic-microservices)
+  version: v3.4.1
+  description: >
+    Redactado a mano a partir de los controladores OwnerResource y PetResource del tag v3.4.1
+    (commit f9fd559361f11b79e622ee0c0c660f42980a36ac) para el corpus de PactGen-AI.
+    Revisar contra el OpenAPI generado con springdoc-openapi antes del experimento.
+    Nota: GET /owners/{ownerId} devuelve Optional<Owner>; si no existe, Spring responde 200 sin cuerpo (no 404).
+paths:
+  /owners:
+    post:
+      operationId: createOwner
+      summary: Crea un propietario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OwnerRequest' }
+      responses:
+        '201':
+          description: Propietario creado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Owner' }
+        '400':
+          description: Datos inválidos (validación de Bean Validation)
+    get:
+      operationId: findAllOwners
+      summary: Lista todos los propietarios
+      responses:
+        '200':
+          description: Lista de propietarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Owner' }
+  /owners/{ownerId}:
+    parameters:
+      - name: ownerId
+        in: path
+        required: true
+        schema: { type: integer, format: int32, minimum: 1 }
+    get:
+      operationId: findOwner
+      summary: Obtiene un propietario con sus mascotas
+      responses:
+        '200':
+          description: Propietario encontrado (cuerpo vacío si no existe)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Owner' }
+        '400':
+          description: ownerId menor que 1
+    put:
+      operationId: updateOwner
+      summary: Actualiza los datos de un propietario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OwnerRequest' }
+      responses:
+        '204':
+          description: Actualizado
+        '400':
+          description: Datos inválidos
+        '404':
+          description: Propietario no encontrado
+  /petTypes:
+    get:
+      operationId: getPetTypes
+      summary: Lista los tipos de mascota
+      responses:
+        '200':
+          description: Tipos de mascota
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PetType' }
+  /owners/{ownerId}/pets:
+    post:
+      operationId: createPet
+      summary: Añade una mascota a un propietario
+      parameters:
+        - name: ownerId
+          in: path
+          required: true
+          schema: { type: integer, format: int32, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PetRequest' }
+      responses:
+        '201':
+          description: Mascota creada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Pet' }
+        '404':
+          description: Propietario no encontrado
+  /owners/{ownerId}/pets/{petId}:
+    parameters:
+      - name: ownerId
+        in: path
+        required: true
+        description: No se usa en el servidor (la ruta real es /owners/*/pets/{petId})
+        schema: { type: integer, format: int32 }
+      - name: petId
+        in: path
+        required: true
+        schema: { type: integer, format: int32 }
+    get:
+      operationId: findPet
+      summary: Obtiene una mascota
+      responses:
+        '200':
+          description: Mascota encontrada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetDetails' }
+        '404':
+          description: Mascota no encontrada
+    put:
+      operationId: updatePet
+      summary: Actualiza una mascota (el id se toma del cuerpo)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PetRequest' }
+      responses:
+        '204':
+          description: Actualizada
+        '404':
+          description: Mascota no encontrada
+components:
+  schemas:
+    PetType:
+      type: object
+      properties:
+        id: { type: integer, format: int32 }
+        name: { type: string }
+    Pet:
+      type: object
+      properties:
+        id: { type: integer, format: int32 }
+        name: { type: string }
+        birthDate: { type: string, format: date }
+        type: { $ref: '#/components/schemas/PetType' }
+    Owner:
+      type: object
+      properties:
+        id: { type: integer, format: int32 }
+        firstName: { type: string }
+        lastName: { type: string }
+        address: { type: string }
+        city: { type: string }
+        telephone: { type: string, pattern: '^\d{1,12}$' }
+        pets:
+          type: array
+          items: { $ref: '#/components/schemas/Pet' }
+    OwnerRequest:
+      type: object
+      required: [firstName, lastName, address, city, telephone]
+      properties:
+        firstName: { type: string, minLength: 1 }
+        lastName: { type: string, minLength: 1 }
+        address: { type: string, minLength: 1 }
+        city: { type: string, minLength: 1 }
+        telephone: { type: string, pattern: '^\d{1,12}$' }
+    PetRequest:
+      type: object
+      properties:
+        id: { type: integer, format: int32 }
+        birthDate: { type: string, format: date }
+        name: { type: string, minLength: 1 }
+        typeId: { type: integer, format: int32 }
+    PetDetails:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        owner: { type: string, description: Nombre y apellido del propietario }
+        birthDate: { type: string, format: date }
+        type: { $ref: '#/components/schemas/PetType' }
