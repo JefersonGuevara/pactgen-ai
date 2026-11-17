@@ -49,7 +49,7 @@ class CoreTest {
         LlmConfig llm = new LlmConfig("replay", "claude-haiku-4-5-20251001", 0.2, 4096, "", "", REPLAY);
         GenerationEngine.Summary s = new GenerationEngine().run(new GenerationEngine.Request(
                 SPEC, "api-gateway", "customers-service", Set.of("findOwner"), out, "pactgen.generated",
-                llm, 2, "v1", 6000));
+                llm, 2, "v1", 6000, true));
         assertEquals(1, s.generated());
         String src = Files.readString(out.resolve("src/test/java/pactgen/generated/FindOwnerPactTest.java"));
         assertTrue(src.contains(".given(\"existe el propietario con id 1 y una mascota\")"));
@@ -63,5 +63,25 @@ class CoreTest {
         dev.pactgen.core.prompt.PromptTemplate v1 = dev.pactgen.core.prompt.PromptTemplate.load("v1");
         assertTrue(v11.system().contains("comportamiento distinto"));
         assertFalse(v11.sha256().equals(v1.sha256()), "cada versión del prompt tiene su propio hash");
+    }
+
+    @Test
+    void dedupeRemovesInteractionsThatOnlyChangeValues() throws Exception {
+        com.fasterxml.jackson.databind.ObjectMapper m = new com.fasterxml.jackson.databind.ObjectMapper();
+        java.util.List<com.fasterxml.jackson.databind.JsonNode> its = java.util.List.of(
+                m.readTree("""
+                        {"providerState":"existe 1","request":{"method":"PUT","path":"/owners/1/pets/5","body":{"name":"Leo","birthDate":"2020-01-01"}},"response":{"status":204}}"""),
+                m.readTree("""
+                        {"providerState":"existe 2","request":{"method":"PUT","path":"/owners/1/pets/6","body":{"name":"Max","birthDate":"2021-05-05"}},"response":{"status":204}}"""),
+                m.readTree("""
+                        {"providerState":"no existe","request":{"method":"PUT","path":"/owners/999/pets/5","body":{"name":"Leo","birthDate":"2020-01-01"}},"response":{"status":404}}"""),
+                m.readTree("""
+                        {"providerState":"lista vacia","request":{"method":"GET","path":"/owners"},"response":{"status":200,"body":[]}}"""),
+                m.readTree("""
+                        {"providerState":"con datos","request":{"method":"GET","path":"/owners"},"response":{"status":200,"body":[{"id":1}]}}"""));
+        dev.pactgen.core.validation.InteractionDeduplicator.Result r =
+                new dev.pactgen.core.validation.InteractionDeduplicator().dedupe(its);
+        assertEquals(1, r.removed(), "solo el segundo 204 es redundante");
+        assertEquals(4, r.kept().size(), "la lista vacía y la lista con datos tienen formas distintas");
     }
 }

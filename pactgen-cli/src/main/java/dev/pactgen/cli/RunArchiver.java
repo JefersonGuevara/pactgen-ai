@@ -41,6 +41,7 @@ final class RunArchiver {
                 - Modelo: %s
                 - Prompt: %s
                 - Operaciones: %d | generadas: %d
+                - Interacciones: %d (redundantes descartadas: %d)
                 - Costo estimado: USD %.4f
                 - Manifiesto: %s
 
@@ -51,7 +52,7 @@ final class RunArchiver {
                 ## Observaciones
 
                 -
-                """, stamp, provider, model, promptVersion, s.operations(), s.generated(), s.costUsd(),
+                """, stamp, provider, model, promptVersion, s.operations(), s.generated(), s.interactions(), s.duplicatesRemoved(), s.costUsd(),
                 s.manifest().getFileName());
         Files.writeString(dir.resolve("NOTAS.md"), notes, StandardCharsets.UTF_8);
         return dir;

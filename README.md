@@ -107,3 +107,9 @@ MIT
 |---|---|
 | v1 | Versión inicial (Anexo B de la memoria). |
 | v1.1 | Prohíbe explícitamente los bloques Markdown; exige que cada interacción verifique un comportamiento distinto (sin variantes que solo cambian datos) y limita a cuatro interacciones por operación. Motivado por la ejecución del 2026-11-17 sobre customers-service (`runs/`). Es la versión por defecto. |
+
+## Filtro de interacciones redundantes (v1.2)
+
+Tras validar la respuesta del modelo, la herramienta descarta las interacciones cuya *firma* ya apareció en la misma operación. La firma ignora los valores concretos (ids, textos, estado del proveedor) y conserva lo que cambia el contrato: método, nombres de los parámetros de consulta, forma del cuerpo de petición, código de estado y forma del cuerpo de respuesta (por ejemplo, una lista vacía y una con elementos tienen formas distintas). El manifiesto registra `duplicatesRemoved` por operación. Se desactiva con `--no-dedupe` para comparar.
+
+Motivación: la regla equivalente del prompt v1.1 no se cumplió de forma fiable (ver `runs/2026-11-17_18-00-41_customers-service_haiku-4-5/NOTAS.md`).

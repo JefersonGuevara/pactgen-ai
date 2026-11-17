@@ -17,6 +17,7 @@ import dev.pactgen.core.model.ApiModel;
 import dev.pactgen.core.model.ApiModel.ApiOperation;
 import dev.pactgen.core.openapi.OpenApiLoader;
 import dev.pactgen.core.prompt.PromptTemplate;
+import dev.pactgen.core.validation.InteractionDeduplicator;
 import dev.pactgen.core.validation.OutputValidator;
 
 import java.io.IOException;
@@ -36,14 +37,15 @@ public final class GenerationEngine {
     /** Parámetros de una ejecución de {@code generate}. */
     public record Request(Path openapi, String consumer, String provider, Set<String> include,
                           Path outDir, String testPackage, LlmConfig llm, int maxRepairs,
-                          String promptVersion, int tokenBudget) {}
+                          String promptVersion, int tokenBudget, boolean dedupe) {}
 
     public record OperationResult(String operationId, String status, int attempts, int interactions,
-                                  int inputTokens, int outputTokens, double costUsd, List<String> lastErrors) {}
+                                  int inputTokens, int outputTokens, double costUsd, List<String> lastErrors,
+                                  int duplicatesRemoved) {}
 
     /** Resultado agregado; incluye los archivos escritos en esta ejecución para poder archivarlos. */
     public record Summary(int operations, int generated, double costUsd, Path manifest,
-                          List<Path> rawFiles, List<Path> testFiles) {}
+                          List<Path> rawFiles, List<Path> testFiles, int interactions, int duplicatesRemoved) {}
 
     private static final ObjectMapper JSON = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -73,7 +75,9 @@ public final class GenerationEngine {
         Path manifest = writeManifest(r, api, prompt, llm, started, results);
         int ok = (int) results.stream().filter(x -> x.status().equals("generated")).count();
         double cost = results.stream().mapToDouble(OperationResult::costUsd).sum();
-        return new Summary(results.size(), ok, cost, manifest, rawFiles, testFiles);
+        return new Summary(results.size(), ok, cost, manifest, rawFiles, testFiles,
+                results.stream().mapToInt(OperationResult::interactions).sum(),
+                results.stream().mapToInt(OperationResult::duplicatesRemoved).sum());
     }
 
     private OperationResult generate(ApiOperation op, Request r, PromptTemplate prompt, LlmClient llm,
@@ -95,7 +99,7 @@ public final class GenerationEngine {
             } catch (Exception e) {
                 System.err.println("[engine] " + op.operationId() + ": error al invocar el modelo: " + e.getMessage());
                 return new OperationResult(op.operationId(), "llm_error", attempt + 1, 0, in, out,
-                        Pricing.costUsd(llm.modelId(), in, out), List.of(String.valueOf(e.getMessage())));
+                        Pricing.costUsd(llm.modelId(), in, out), List.of(String.valueOf(e.getMessage())), 0);
             }
             in += resp.inputTokens();
             out += resp.outputTokens();
@@ -111,15 +115,22 @@ public final class GenerationEngine {
         }
         double cost = Pricing.costUsd(llm.modelId(), in, out);
         if (result == null || !result.valid()) {
-            return new OperationResult(op.operationId(), "invalid", attempt, 0, in, out, cost, errors);
+            return new OperationResult(op.operationId(), "invalid", attempt, 0, in, out, cost, errors, 0);
         }
         List<JsonNode> interactions = new ArrayList<>();
         result.output().path("interactions").forEach(interactions::add);
+        int removed = 0;
+        if (r.dedupe()) {
+            InteractionDeduplicator.Result d = new InteractionDeduplicator().dedupe(interactions);
+            interactions = d.kept();
+            removed = d.removed();
+        }
         PactTestRenderer.Rendered test = renderer.render(r.testPackage(), r.consumer(), r.provider(), op, interactions);
         Path testFile = testDir.resolve(test.className() + ".java");
         Files.writeString(testFile, test.source());
         testFiles.add(testFile);
-        return new OperationResult(op.operationId(), "generated", attempt, interactions.size(), in, out, cost, List.of());
+        return new OperationResult(op.operationId(), "generated", attempt, interactions.size(), in, out, cost,
+                List.of(), removed);
     }
 
     private static void archive(Path file, LlmResponse resp) throws IOException {
@@ -134,7 +145,7 @@ public final class GenerationEngine {
     private Path writeManifest(Request r, ApiModel api, PromptTemplate prompt, LlmClient llm,
                                Instant started, List<OperationResult> results) throws IOException {
         ObjectNode m = JSON.createObjectNode();
-        m.put("tool", "pactgen-ai 0.1.0-SNAPSHOT");
+        m.put("tool", "pactgen-ai 0.1.0-SNAPSHOT (v1.2)");
         m.put("startedAt", started.toString());
         m.put("finishedAt", Instant.now().toString());
         m.put("openapi", r.openapi().toString());
@@ -149,6 +160,7 @@ public final class GenerationEngine {
         model.put("temperature", r.llm().temperature());
         model.put("maxTokens", r.llm().maxTokens());
         model.put("maxRepairs", r.maxRepairs());
+        m.put("dedupe", r.dedupe());
         m.put("promptVersion", prompt.version());
         m.put("promptSha256", prompt.sha256());
         ArrayNode ops = m.putArray("operations");

@@ -52,6 +52,9 @@ public class PactGenCli implements Runnable {
         @Option(names = "--archive", description = "Copia el manifiesto, las respuestas crudas y las pruebas "
                 + "generadas a <dir>/<fecha>_<proveedor>_<modelo>/ junto con un NOTAS.md (bitácora)")
         Path archive;
+        @Option(names = "--no-dedupe", negatable = false, description = "Desactiva el filtro de interacciones redundantes "
+                + "(solo para comparar; por defecto activo)")
+        boolean noDedupe;
         @Option(names = "--token-budget", defaultValue = "6000") int tokenBudget;
 
         @Override
@@ -63,9 +66,9 @@ public class PactGenCli implements Runnable {
             try {
                 GenerationEngine.Summary s = new GenerationEngine().run(new GenerationEngine.Request(
                         openapi, consumer, this.provider, new HashSet<>(include), out, testPackage, llm,
-                        maxRepairs, promptVersion, tokenBudget));
-                System.out.printf("Operaciones: %d | generadas: %d | costo estimado: USD %.4f%nManifiesto: %s%n",
-                        s.operations(), s.generated(), s.costUsd(), s.manifest());
+                        maxRepairs, promptVersion, tokenBudget, !noDedupe));
+                System.out.printf("Operaciones: %d | generadas: %d | interacciones: %d (redundantes descartadas: %d) | costo estimado: USD %.4f%nManifiesto: %s%n",
+                        s.operations(), s.generated(), s.interactions(), s.duplicatesRemoved(), s.costUsd(), s.manifest());
                 if (archive != null) {
                     Path dir = RunArchiver.archive(archive, s, this.provider, llm.model(), promptVersion);
                     System.out.println("Archivado en: " + dir);

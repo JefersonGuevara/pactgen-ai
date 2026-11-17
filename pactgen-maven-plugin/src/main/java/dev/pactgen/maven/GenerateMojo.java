@@ -63,7 +63,7 @@ public class GenerateMojo extends AbstractMojo {
         try {
             GenerationEngine.Summary s = new GenerationEngine().run(new GenerationEngine.Request(
                     openapi.toPath(), consumer, provider, new HashSet<>(include), outputDirectory.toPath(),
-                    testPackage, llm, maxRepairs, "v1.1", 6000));
+                    testPackage, llm, maxRepairs, "v1.1", 6000, true));
             getLog().info(String.format("PactGen-AI: %d/%d operaciones generadas, costo estimado USD %.4f",
                     s.generated(), s.operations(), s.costUsd()));
             project.addTestCompileSourceRoot(new File(outputDirectory, "src/test/java").getAbsolutePath());
