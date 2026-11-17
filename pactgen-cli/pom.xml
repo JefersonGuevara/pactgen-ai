@@ -20,6 +20,13 @@
       <groupId>info.picocli</groupId>
       <artifactId>picocli</artifactId>
     </dependency>
+    <!-- swagger-parser usa SLF4J 2.x; sin un proveedor imprime un aviso en cada ejecución -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-nop</artifactId>
+      <version>2.0.16</version>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
 
   <build>

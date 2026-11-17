@@ -57,6 +57,7 @@ java -jar pactgen-cli/target/pactgen.jar generate ... --llm-provider openai --mo
 
 Cada ejecución deja en `<out>/pactgen/`:
 
+- Con `--archive runs`, la CLI copia además el manifiesto, las respuestas crudas y las pruebas generadas a `runs/<fecha>_<proveedor>_<modelo>/` y crea un `NOTAS.md` para la bitácora.
 - `manifest-<fecha>.json`: modelo, temperatura, hash SHA-256 del prompt y del OpenAPI, tokens, costo e intentos por operación.
 - `raw/<operationId>-<intento>.json`: respuestas crudas del modelo, reutilizables con `--replay` (RF-12).
 
@@ -83,7 +84,7 @@ Cada ejecución deja en `<out>/pactgen/`:
 ## Estructura
 
 ```
-pactgen-core/            núcleo (M1–M4), prompts en src/main/resources/prompts/v1
+pactgen-core/            núcleo (M1–M4), prompts en src/main/resources/prompts/v1 y v1.1
 pactgen-cli/             CLI
 pactgen-maven-plugin/    plugin Maven
 examples/spike-consumer/ proyecto consumidor mínimo donde se escriben y ejecutan las pruebas
@@ -99,3 +100,10 @@ validation/              OpenAPIs del corpus, mutantes (bc/*) y scripts de anál
 ## Licencia
 
 MIT
+
+## Versiones del prompt
+
+| Versión | Cambios |
+|---|---|
+| v1 | Versión inicial (Anexo B de la memoria). |
+| v1.1 | Prohíbe explícitamente los bloques Markdown; exige que cada interacción verifique un comportamiento distinto (sin variantes que solo cambian datos) y limita a cuatro interacciones por operación. Motivado por la ejecución del 2026-11-17 sobre customers-service (`runs/`). Es la versión por defecto. |
