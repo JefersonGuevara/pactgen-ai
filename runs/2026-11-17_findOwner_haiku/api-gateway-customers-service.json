@@ -5,13 +5,170 @@
   "interactions": [
     {
       "comments": {
+        "testname": "pactgen.generated.CreateOwnerPactTest.interaction0(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para crear un propietario con todos los campos v\u00E1lidos",
+      "key": "e6139d9a",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "el servicio de clientes est\u00E1 disponible y acepta nuevos propietarios"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "address": "123 Main Street",
+            "city": "Springfield",
+            "firstName": "John",
+            "lastName": "Doe",
+            "telephone": "5551234567"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/owners"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "address": "123 Main Street",
+            "city": "Springfield",
+            "firstName": "John",
+            "id": 1,
+            "lastName": "Doe",
+            "pets": [
+
+            ],
+            "telephone": "5551234567"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
         "testname": "pactgen.generated.FindOwnerPactTest.interaction2(MockServer)",
         "text": [
 
         ]
       },
-      "description": "una petici\u00F3n con un ownerId inv\u00E1lido",
-      "key": "b1ad6c83",
+      "description": "una petici\u00F3n con un id de propietario inv\u00E1lido",
+      "key": "fcf84b57",
       "pending": false,
       "providerStates": [
         {
@@ -30,17 +187,600 @@
     },
     {
       "comments": {
+        "testname": "pactgen.generated.CreateOwnerPactTest.interaction2(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n de alta con un tel\u00E9fono en formato inv\u00E1lido",
+      "key": "1bb783d7",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "el servicio de clientes est\u00E1 disponible"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "address": "456 Oak Avenue",
+            "city": "Shelbyville",
+            "firstName": "Jane",
+            "lastName": "Smith",
+            "telephone": "555-invalid"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/owners"
+      },
+      "response": {
+        "status": 400
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.CreateOwnerPactTest.interaction1(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n de alta sin el campo firstName obligatorio",
+      "key": "e200290c",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "el servicio de clientes est\u00E1 disponible"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "address": "123 Main Street",
+            "city": "Springfield",
+            "lastName": "Doe",
+            "telephone": "5551234567"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/owners"
+      },
+      "response": {
+        "status": 400
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.FindAllOwnersPactTest.interaction1(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para obtener propietarios sin mascotas",
+      "key": "2f47a1f0",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe 1 propietario en el sistema sin mascotas asociadas"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/owners"
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "address": "789 Pine Rd",
+              "city": "Capital City",
+              "firstName": "Robert",
+              "id": 3,
+              "lastName": "Johnson",
+              "pets": [
+
+              ],
+              "telephone": "5555551234"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.FindPetPactTest.interaction2(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n de una mascota inexistente bajo un propietario v\u00E1lido",
+      "key": "3cb04f00",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 1 pero no existe la mascota con id 999 bajo ese propietario"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/owners/1/pets/999"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.UpdatePetPactTest.interaction2(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para actualizar una mascota inexistente",
+      "key": "d99e9606",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 1 pero no existe la mascota con id 999"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "id": 999,
+            "name": "Ghost"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PUT",
+        "path": "/owners/1/pets/999"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.FindPetPactTest.interaction0(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n de una mascota existente bajo un propietario v\u00E1lido",
+      "key": "f441a549",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 1 y la mascota con id 5 bajo ese propietario"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/owners/1/pets/5"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "birthDate": "2020-03-15",
+            "id": 5,
+            "name": "Fluffy",
+            "owner": "John Doe",
+            "type": {
+              "id": 1,
+              "name": "cat"
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.birthDate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.owner": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.type.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.UpdatePetPactTest.interaction0(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para actualizar una mascota existente con todos los campos",
+      "key": "56a64bfc",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 1 y la mascota con id 5 pertenece a ese propietario"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "birthDate": "2020-03-15",
+            "id": 5,
+            "name": "Fluffy",
+            "typeId": 1
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.birthDate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.typeId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PUT",
+        "path": "/owners/1/pets/5"
+      },
+      "response": {
+        "status": 204
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.UpdatePetPactTest.interaction1(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para actualizar una mascota con solo el nombre",
+      "key": "4249aca9",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 1 y la mascota con id 6 pertenece a ese propietario"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "id": 6,
+            "name": "Max"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PUT",
+        "path": "/owners/1/pets/6"
+      },
+      "response": {
+        "status": 204
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
         "testname": "pactgen.generated.FindOwnerPactTest.interaction0(MockServer)",
         "text": [
 
         ]
       },
       "description": "una petici\u00F3n de un propietario existente con mascotas",
-      "key": "8a9ae5a4",
+      "key": "b4f08cbf",
       "pending": false,
       "providerStates": [
         {
-          "name": "existe el propietario con id 1 que tiene dos mascotas registradas"
+          "name": "existe el propietario con id 1 y tiene 2 mascotas asociadas"
         }
       ],
       "request": {
@@ -50,23 +790,23 @@
       "response": {
         "body": {
           "content": {
-            "address": "123 Main Street",
-            "city": "Springfield",
-            "firstName": "John",
+            "address": "Calle Principal 123",
+            "city": "Madrid",
+            "firstName": "Juan",
             "id": 1,
-            "lastName": "Doe",
+            "lastName": "Garc\u00EDa",
             "pets": [
               {
-                "birthDate": "2020-03-15",
+                "birthDate": "2020-05-15",
                 "id": 1,
-                "name": "Fluffy",
+                "name": "Max",
                 "type": {
                   "id": 1,
-                  "name": "cat"
+                  "name": "Perro"
                 }
               }
             ],
-            "telephone": "5551234567"
+            "telephone": "912345678"
           },
           "contentType": "application/json",
           "encoded": false
@@ -184,17 +924,233 @@
     },
     {
       "comments": {
+        "testname": "pactgen.generated.UpdateOwnerPactTest.interaction0(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para actualizar un propietario existente con datos v\u00E1lidos",
+      "key": "f2a1cfcb",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 1"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "address": "123 Main Street",
+            "city": "Springfield",
+            "firstName": "John",
+            "lastName": "Doe",
+            "telephone": "5551234567"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PUT",
+        "path": "/owners/1"
+      },
+      "response": {
+        "status": 204
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.CreatePetPactTest.interaction0(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para crear una mascota en un propietario existente",
+      "key": "7620d566",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 1"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "birthDate": "2020-05-15",
+            "name": "Fluffy",
+            "typeId": 1
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.birthDate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.typeId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/owners/1/pets"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "birthDate": "2020-05-15",
+            "id": 101,
+            "name": "Fluffy",
+            "type": {
+              "id": 1,
+              "name": "Dog"
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.birthDate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.type.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
         "testname": "pactgen.generated.FindOwnerPactTest.interaction1(MockServer)",
         "text": [
 
         ]
       },
       "description": "una petici\u00F3n de un propietario existente sin mascotas",
-      "key": "538955bb",
+      "key": "f128d37f",
       "pending": false,
       "providerStates": [
         {
-          "name": "existe el propietario con id 2 sin mascotas registradas"
+          "name": "existe el propietario con id 2 y no tiene mascotas asociadas"
         }
       ],
       "request": {
@@ -204,15 +1160,15 @@
       "response": {
         "body": {
           "content": {
-            "address": "456 Oak Avenue",
-            "city": "Shelbyville",
-            "firstName": "Jane",
+            "address": "Avenida Central 456",
+            "city": "Barcelona",
+            "firstName": "Mar\u00EDa",
             "id": 2,
-            "lastName": "Smith",
+            "lastName": "L\u00F3pez",
             "pets": [
 
             ],
-            "telephone": "5559876543"
+            "telephone": "934567890"
           },
           "contentType": "application/json",
           "encoded": false
@@ -273,6 +1229,899 @@
               ]
             }
           }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.UpdateOwnerPactTest.interaction2(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n de actualizaci\u00F3n sin un campo obligatorio",
+      "key": "8f86af95",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 2"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "address": "789 Elm Street",
+            "city": "Capital City",
+            "firstName": "Robert",
+            "lastName": "Johnson"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PUT",
+        "path": "/owners/2"
+      },
+      "response": {
+        "status": 400
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.CreatePetPactTest.interaction1(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para crear una mascota sin typeId",
+      "key": "2f03da1d",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 2"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "birthDate": "2021-03-20",
+            "name": "Whiskers"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.birthDate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/owners/2/pets"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "birthDate": "2021-03-20",
+            "id": 102,
+            "name": "Whiskers",
+            "type": {
+              "id": 2,
+              "name": "Cat"
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.birthDate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.type.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.type.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.UpdateOwnerPactTest.interaction3(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n de actualizaci\u00F3n con tel\u00E9fono en formato inv\u00E1lido",
+      "key": "9c80354d",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 3"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "address": "321 Pine Road",
+            "city": "Metropolis",
+            "firstName": "Mary",
+            "lastName": "Williams",
+            "telephone": "555-INVALID"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PUT",
+        "path": "/owners/3"
+      },
+      "response": {
+        "status": 400
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.GetPetTypesPactTest.interaction2(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para obtener un \u00FAnico tipo de mascota",
+      "key": "65ab16aa",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe un \u00FAnico tipo de mascota registrado: reptil"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/petTypes"
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "id": 4,
+              "name": "Reptil"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.FindAllOwnersPactTest.interaction0(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para obtener todos los propietarios con mascotas",
+      "key": "96709b7a",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existen 2 propietarios en el sistema, el primero con 1 mascota y el segundo con 2 mascotas"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/owners"
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "address": "123 Main St",
+              "city": "Springfield",
+              "firstName": "John",
+              "id": 1,
+              "lastName": "Doe",
+              "pets": [
+                {
+                  "birthDate": "2020-05-15",
+                  "id": 101,
+                  "name": "Buddy",
+                  "type": {
+                    "id": 1,
+                    "name": "Dog"
+                  }
+                }
+              ],
+              "telephone": "5551234567"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].pets": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].pets[*].birthDate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$[*].pets[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].pets[*].name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].pets[*].type.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].pets[*].type.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.GetPetTypesPactTest.interaction0(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para obtener m\u00FAltiples tipos de mascota",
+      "key": "12fbd7e8",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existen tres tipos de mascota registrados: perro, gato y p\u00E1jaro"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/petTypes"
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "id": 1,
+              "name": "Perro"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.FindPetPactTest.interaction1(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n de una mascota bajo un propietario inexistente",
+      "key": "5fd4ecdd",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "no existe el propietario con id 999"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/owners/999/pets/5"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.UpdateOwnerPactTest.interaction1(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para actualizar un propietario inexistente",
+      "key": "1ddef02e",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "no existe el propietario con id 999"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "address": "456 Oak Avenue",
+            "city": "Shelbyville",
+            "firstName": "Jane",
+            "lastName": "Smith",
+            "telephone": "5559876543"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PUT",
+        "path": "/owners/999"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.UpdatePetPactTest.interaction3(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para actualizar una mascota de un propietario inexistente",
+      "key": "233bac5",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "no existe el propietario con id 999"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "id": 5,
+            "name": "Buddy"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PUT",
+        "path": "/owners/999/pets/5"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.CreatePetPactTest.interaction2(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para crear una mascota en un propietario inexistente",
+      "key": "1ead1528",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "no existe el propietario con id 999"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "birthDate": "2019-07-10",
+            "name": "Rex",
+            "typeId": 1
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.birthDate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.typeId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/owners/999/pets"
+      },
+      "response": {
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.FindAllOwnersPactTest.interaction2(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n cuando no existen propietarios",
+      "key": "bbe16899",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "no existen propietarios en el sistema"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/owners"
+      },
+      "response": {
+        "body": {
+          "content": [
+
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.GetPetTypesPactTest.interaction1(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n para obtener tipos de mascota cuando no hay ninguno registrado",
+      "key": "368bcbaf",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "no existen tipos de mascota registrados"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/petTypes"
+      },
+      "response": {
+        "body": {
+          "content": [
+
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
         },
         "status": 200
       },

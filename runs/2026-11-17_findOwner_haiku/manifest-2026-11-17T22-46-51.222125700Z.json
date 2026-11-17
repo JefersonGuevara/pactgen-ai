@@ -1,0 +1,94 @@
+{
+  "tool" : "pactgen-ai 0.1.0-SNAPSHOT",
+  "startedAt" : "2026-11-17T22:46:51.222125700Z",
+  "finishedAt" : "2026-11-17T22:47:27.549019300Z",
+  "openapi" : "validation\\microservices\\customers-service\\openapi.yaml",
+  "openapiSha256" : "6fb7754dbde9979d7dc5f8176cf0830ab1b9f35bb5bbf7c552613502aae15f76",
+  "apiTitle" : "customers-service (spring-petclinic-microservices)",
+  "apiVersion" : "v3.4.1",
+  "consumer" : "api-gateway",
+  "provider" : "customers-service",
+  "model" : {
+    "provider" : "anthropic",
+    "id" : "claude-haiku-4-5-20251001",
+    "temperature" : 0.2,
+    "maxTokens" : 4096,
+    "maxRepairs" : 2
+  },
+  "promptVersion" : "v1",
+  "promptSha256" : "2ce39fec4f2863b395bf33a70cc3589fece4cf71ee7c5c419009127474fccae5",
+  "operations" : [ {
+    "operationId" : "findAllOwners",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 3,
+    "inputTokens" : 2040,
+    "outputTokens" : 903,
+    "costUsd" : 0.006555,
+    "lastErrors" : [ ]
+  }, {
+    "operationId" : "createOwner",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 3,
+    "inputTokens" : 2132,
+    "outputTokens" : 707,
+    "costUsd" : 0.005667,
+    "lastErrors" : [ ]
+  }, {
+    "operationId" : "findOwner",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 3,
+    "inputTokens" : 2073,
+    "outputTokens" : 758,
+    "costUsd" : 0.005863,
+    "lastErrors" : [ ]
+  }, {
+    "operationId" : "updateOwner",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 4,
+    "inputTokens" : 2018,
+    "outputTokens" : 773,
+    "costUsd" : 0.005882999999999999,
+    "lastErrors" : [ ]
+  }, {
+    "operationId" : "getPetTypes",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 3,
+    "inputTokens" : 1912,
+    "outputTokens" : 581,
+    "costUsd" : 0.004817,
+    "lastErrors" : [ ]
+  }, {
+    "operationId" : "createPet",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 3,
+    "inputTokens" : 2045,
+    "outputTokens" : 736,
+    "costUsd" : 0.005725,
+    "lastErrors" : [ ]
+  }, {
+    "operationId" : "findPet",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 3,
+    "inputTokens" : 2024,
+    "outputTokens" : 555,
+    "costUsd" : 0.004799,
+    "lastErrors" : [ ]
+  }, {
+    "operationId" : "updatePet",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 4,
+    "inputTokens" : 2002,
+    "outputTokens" : 750,
+    "costUsd" : 0.005752,
+    "lastErrors" : [ ]
+  } ],
+  "totalCostUsd" : 0.045061000000000004
+}
