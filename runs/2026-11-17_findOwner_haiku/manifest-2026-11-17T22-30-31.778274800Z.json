@@ -1,0 +1,31 @@
+{
+  "tool" : "pactgen-ai 0.1.0-SNAPSHOT",
+  "startedAt" : "2026-11-17T22:30:31.778274800Z",
+  "finishedAt" : "2026-11-17T22:30:36.605354100Z",
+  "openapi" : "validation\\microservices\\customers-service\\openapi.yaml",
+  "openapiSha256" : "6fb7754dbde9979d7dc5f8176cf0830ab1b9f35bb5bbf7c552613502aae15f76",
+  "apiTitle" : "customers-service (spring-petclinic-microservices)",
+  "apiVersion" : "v3.4.1",
+  "consumer" : "api-gateway",
+  "provider" : "customers-service",
+  "model" : {
+    "provider" : "anthropic",
+    "id" : "claude-haiku-4-5-20251001",
+    "temperature" : 0.2,
+    "maxTokens" : 4096,
+    "maxRepairs" : 2
+  },
+  "promptVersion" : "v1",
+  "promptSha256" : "2ce39fec4f2863b395bf33a70cc3589fece4cf71ee7c5c419009127474fccae5",
+  "operations" : [ {
+    "operationId" : "findOwner",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 3,
+    "inputTokens" : 2073,
+    "outputTokens" : 723,
+    "costUsd" : 0.005688,
+    "lastErrors" : [ ]
+  } ],
+  "totalCostUsd" : 0.005688
+}

@@ -1,0 +1,294 @@
+{
+  "consumer": {
+    "name": "api-gateway"
+  },
+  "interactions": [
+    {
+      "comments": {
+        "testname": "pactgen.generated.FindOwnerPactTest.interaction2(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n con un ownerId inv\u00E1lido",
+      "key": "b1ad6c83",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "el servicio de clientes est\u00E1 disponible"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/owners/0"
+      },
+      "response": {
+        "status": 400
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.FindOwnerPactTest.interaction0(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n de un propietario existente con mascotas",
+      "key": "8a9ae5a4",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 1 que tiene dos mascotas registradas"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/owners/1"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "address": "123 Main Street",
+            "city": "Springfield",
+            "firstName": "John",
+            "id": 1,
+            "lastName": "Doe",
+            "pets": [
+              {
+                "birthDate": "2020-03-15",
+                "id": 1,
+                "name": "Fluffy",
+                "type": {
+                  "id": 1,
+                  "name": "cat"
+                }
+              }
+            ],
+            "telephone": "5551234567"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.pets": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.pets[*].birthDate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.pets[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.pets[*].name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.pets[*].type.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.pets[*].type.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "pactgen.generated.FindOwnerPactTest.interaction1(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "una petici\u00F3n de un propietario existente sin mascotas",
+      "key": "538955bb",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existe el propietario con id 2 sin mascotas registradas"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/owners/2"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "address": "456 Oak Avenue",
+            "city": "Shelbyville",
+            "firstName": "Jane",
+            "id": 2,
+            "lastName": "Smith",
+            "pets": [
+
+            ],
+            "telephone": "5559876543"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.17"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "customers-service"
+  }
+}
