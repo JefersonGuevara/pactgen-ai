@@ -17,6 +17,7 @@ import dev.pactgen.core.model.ApiModel;
 import dev.pactgen.core.model.ApiModel.ApiOperation;
 import dev.pactgen.core.openapi.OpenApiLoader;
 import dev.pactgen.core.prompt.PromptTemplate;
+import dev.pactgen.core.validation.HeaderFilter;
 import dev.pactgen.core.validation.InteractionDeduplicator;
 import dev.pactgen.core.validation.OutputValidator;
 
@@ -41,7 +42,7 @@ public final class GenerationEngine {
 
     public record OperationResult(String operationId, String status, int attempts, int interactions,
                                   int inputTokens, int outputTokens, double costUsd, List<String> lastErrors,
-                                  int duplicatesRemoved) {}
+                                  int duplicatesRemoved, int headersRemoved) {}
 
     /** Resultado agregado; incluye los archivos escritos en esta ejecución para poder archivarlos. */
     public record Summary(int operations, int generated, double costUsd, Path manifest,
@@ -99,7 +100,7 @@ public final class GenerationEngine {
             } catch (Exception e) {
                 System.err.println("[engine] " + op.operationId() + ": error al invocar el modelo: " + e.getMessage());
                 return new OperationResult(op.operationId(), "llm_error", attempt + 1, 0, in, out,
-                        Pricing.costUsd(llm.modelId(), in, out), List.of(String.valueOf(e.getMessage())), 0);
+                        Pricing.costUsd(llm.modelId(), in, out), List.of(String.valueOf(e.getMessage())), 0, 0);
             }
             in += resp.inputTokens();
             out += resp.outputTokens();
@@ -115,10 +116,11 @@ public final class GenerationEngine {
         }
         double cost = Pricing.costUsd(llm.modelId(), in, out);
         if (result == null || !result.valid()) {
-            return new OperationResult(op.operationId(), "invalid", attempt, 0, in, out, cost, errors, 0);
+            return new OperationResult(op.operationId(), "invalid", attempt, 0, in, out, cost, errors, 0, 0);
         }
         List<JsonNode> interactions = new ArrayList<>();
         result.output().path("interactions").forEach(interactions::add);
+        int headersRemoved = new HeaderFilter().filter(interactions, op);
         int removed = 0;
         if (r.dedupe()) {
             InteractionDeduplicator.Result d = new InteractionDeduplicator().dedupe(interactions);
@@ -130,7 +132,7 @@ public final class GenerationEngine {
         Files.writeString(testFile, test.source());
         testFiles.add(testFile);
         return new OperationResult(op.operationId(), "generated", attempt, interactions.size(), in, out, cost,
-                List.of(), removed);
+                List.of(), removed, headersRemoved);
     }
 
     private static void archive(Path file, LlmResponse resp) throws IOException {
@@ -145,7 +147,7 @@ public final class GenerationEngine {
     private Path writeManifest(Request r, ApiModel api, PromptTemplate prompt, LlmClient llm,
                                Instant started, List<OperationResult> results) throws IOException {
         ObjectNode m = JSON.createObjectNode();
-        m.put("tool", "pactgen-ai 0.1.0-SNAPSHOT (v1.2)");
+        m.put("tool", "pactgen-ai 0.1.0-SNAPSHOT (v1.3)");
         m.put("startedAt", started.toString());
         m.put("finishedAt", Instant.now().toString());
         m.put("openapi", r.openapi().toString());

@@ -84,4 +84,29 @@ class CoreTest {
         assertEquals(1, r.removed(), "solo el segundo 204 es redundante");
         assertEquals(4, r.kept().size(), "la lista vacía y la lista con datos tienen formas distintas");
     }
+
+    @Test
+    void headerFilterRemovesUndeclaredRequestHeaders() throws Exception {
+        com.fasterxml.jackson.databind.ObjectMapper m = new com.fasterxml.jackson.databind.ObjectMapper();
+        ApiOperation op = new OpenApiLoader().load(SPEC).operations().stream()
+                .filter(o -> o.operationId().equals("findOwner")).findFirst().orElseThrow();
+        java.util.List<com.fasterxml.jackson.databind.JsonNode> its = java.util.List.of(m.readTree("""
+                {"request":{"method":"GET","path":"/owners/1","headers":{"Authorization":"Bearer x","Accept":"application/json"}},"response":{"status":200}}"""));
+        int removed = new dev.pactgen.core.validation.HeaderFilter().filter(its, op);
+        assertEquals(1, removed);
+        assertFalse(its.get(0).path("request").path("headers").has("Authorization"));
+        assertTrue(its.get(0).path("request").path("headers").has("Accept"));
+    }
+
+    @Test
+    void errorInteractionsUseExactRequestBody() throws Exception {
+        com.fasterxml.jackson.databind.ObjectMapper m = new com.fasterxml.jackson.databind.ObjectMapper();
+        ApiOperation op = new OpenApiLoader().load(SPEC).operations().stream()
+                .filter(o -> o.operationId().equals("createOwner")).findFirst().orElseThrow();
+        java.util.List<com.fasterxml.jackson.databind.JsonNode> its = java.util.List.of(m.readTree("""
+                {"description":"sin nombre","providerState":"s","request":{"method":"POST","path":"/owners","body":{"firstName":""}},"response":{"status":400}}"""));
+        String src = new dev.pactgen.core.generator.PactTestRenderer()
+                .render("pactgen.generated", "api-gateway", "customers-service", op, its).source();
+        assertTrue(src.contains(".body(\"{\\\"firstName\\\":\\\"\\\"}\", \"application/json\")"), src);
+    }
 }

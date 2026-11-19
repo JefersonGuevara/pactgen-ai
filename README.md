@@ -113,3 +113,8 @@ MIT
 Tras validar la respuesta del modelo, la herramienta descarta las interacciones cuya *firma* ya apareció en la misma operación. La firma ignora los valores concretos (ids, textos, estado del proveedor) y conserva lo que cambia el contrato: método, nombres de los parámetros de consulta, forma del cuerpo de petición, código de estado y forma del cuerpo de respuesta (por ejemplo, una lista vacía y una con elementos tienen formas distintas). El manifiesto registra `duplicatesRemoved` por operación. Se desactiva con `--no-dedupe` para comparar.
 
 Motivación: la regla equivalente del prompt v1.1 no se cumplió de forma fiable (ver `runs/2026-11-17_18-00-41_customers-service_haiku-4-5/NOTAS.md`).
+
+## Filtros de la versión 1.3
+
+- **Cabeceras no declaradas.** Se eliminan de cada petición las cabeceras que el OpenAPI no declara como parámetros `in: header` (se conservan `Content-Type` y `Accept`). Motivo: en statistics-service el modelo añadió `Authorization: Bearer valid-token`, aunque la autenticación no forma parte del contrato. El manifiesto registra `headersRemoved`.
+- **Cuerpos exactos en errores.** En las interacciones con respuesta 4xx/5xx, el cuerpo de la petición se escribe con valores exactos en lugar de reglas por tipo, para que el contrato exprese qué petición concreta produce el error.

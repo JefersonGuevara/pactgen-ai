@@ -67,7 +67,12 @@ public final class PactTestRenderer {
             s.append("    @Pact(consumer = ").append(str(consumer)).append(", provider = ").append(str(provider)).append(")\n");
             s.append("    public V4Pact pact").append(i).append("(PactDslWithProvider builder) {\n");
             varCounter = 0;
-            String reqBody = bodyVar(s, req.path("body"), "req");
+            // En las respuestas de error (4xx/5xx) el cuerpo de la petición se fija con valores exactos (v1.3):
+            // el contrato debe decir "esta petición concreta produce el error", no "cualquier cuerpo con esta forma".
+            boolean exactRequest = res.path("status").asInt() >= 400 && hasBody(req.path("body"));
+            String reqBody = exactRequest
+                    ? str(compact(req.path("body"))) + ", \"application/json\""
+                    : bodyVar(s, req.path("body"), "req");
             String resBody = bodyVar(s, res.path("body"), "res");
             s.append("        return builder\n");
             s.append("            .given(").append(str(it.path("providerState").asText())).append(")\n");
@@ -230,6 +235,10 @@ public final class PactTestRenderer {
             sb.append(e.getKey()).append('=').append(e.getValue().asText());
         }
         return sb.toString();
+    }
+
+    private static boolean hasBody(JsonNode body) {
+        return body != null && !body.isMissingNode() && !body.isNull();
     }
 
     private static String compact(JsonNode n) {
