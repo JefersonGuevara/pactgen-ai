@@ -2,6 +2,7 @@ package dev.pactgen.core.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import dev.pactgen.core.model.ApiModel.ApiOperation;
 
 import java.util.List;
@@ -72,8 +73,9 @@ public final class PactTestRenderer {
             boolean exactRequest = res.path("status").asInt() >= 400 && hasBody(req.path("body"));
             String reqBody = exactRequest
                     ? str(compact(req.path("body"))) + ", \"application/json\""
-                    : bodyVar(s, req.path("body"), "req");
-            String resBody = bodyVar(s, res.path("body"), "res");
+                    : bodyVar(s, req.path("body"), "req", schema(op.requestBodySchema()));
+            String resBody = bodyVar(s, res.path("body"), "res",
+                    schema(op.responses().get(String.valueOf(res.path("status").asInt()))));
             s.append("        return builder\n");
             s.append("            .given(").append(str(it.path("providerState").asText())).append(")\n");
             s.append("            .uponReceiving(").append(str(it.path("description").asText())).append(")\n");
@@ -127,12 +129,12 @@ public final class PactTestRenderer {
     // ------------------------------------------------------------------ cuerpos con reglas por tipo
 
     /** Declara variables para el cuerpo y devuelve el nombre de la variable DslPart, o null si no hay cuerpo. */
-    private String bodyVar(StringBuilder s, JsonNode body, String prefix) {
+    private String bodyVar(StringBuilder s, JsonNode body, String prefix, JsonNode schema) {
         if (body == null || body.isMissingNode() || body.isNull()) return null;
         String root = prefix + "Body";
         if (body.isObject()) {
             s.append("        PactDslJsonBody ").append(root).append(" = new PactDslJsonBody();\n");
-            fields(s, root, body);
+            fields(s, root, body, schema);
             return root;
         }
         if (body.isArray()) {
@@ -140,11 +142,11 @@ public final class PactTestRenderer {
             if (first != null && first.isObject()) {
                 String el = newVar(prefix + "Item");
                 s.append("        PactDslJsonBody ").append(el).append(" = PactDslJsonArray.arrayEachLike();\n");
-                fields(s, el, first);
+                fields(s, el, first, schema.path("items"));
                 s.append("        DslPart ").append(root).append(" = ").append(el).append(".closeObject();\n");
             } else if (first != null) {
                 s.append("        DslPart ").append(root).append(" = PactDslJsonArray.arrayEachLike(")
-                        .append(rootValue(first)).append(");\n");
+                        .append(rootValue(first, schema.path("items"))).append(");\n");
             } else {
                 s.append("        DslPart ").append(root).append(" = new PactDslJsonArray();\n");
             }
@@ -153,11 +155,35 @@ public final class PactTestRenderer {
         return null;
     }
 
-    private void fields(StringBuilder s, String var, JsonNode obj) {
+    /**
+     * Reglas de coincidencia (v1.4): el tipo de cada campo lo decide el esquema OpenAPI cuando existe
+     * (format date → fecha; otro string → texto; integer → entero; number → número). El valor del modelo
+     * solo se usa como ejemplo. Sin esquema para el campo, se infiere del valor como antes.
+     */
+    private void fields(StringBuilder s, String var, JsonNode obj, JsonNode schema) {
         for (Map.Entry<String, JsonNode> e : obj.properties()) {
             String name = str(e.getKey());
             JsonNode v = e.getValue();
-            if (v.isTextual()) {
+            JsonNode fs = schema == null ? MissingNode.getInstance() : schema.path("properties").path(e.getKey());
+            String type = fs.path("type").asText("");
+            String format = fs.path("format").asText("");
+            if (v.isNumber() && (type.equals("integer") || type.equals("number"))) {
+                if (type.equals("integer") && v.isIntegralNumber()) {
+                    s.append("        ").append(var).append(".integerType(").append(name).append(", ")
+                            .append(v.asLong()).append(v.canConvertToInt() ? "" : "L").append(");\n");
+                } else {
+                    s.append("        ").append(var).append(".numberType(").append(name).append(", ")
+                            .append(numberLiteral(v)).append(");\n");
+                }
+            } else if (v.isTextual() && type.equals("string")) {
+                if (format.equals("date") && ISO_DATE.matcher(v.asText()).matches()) {
+                    s.append("        ").append(var).append(".stringMatcher(").append(name)
+                            .append(", \"\\\\d{4}-\\\\d{2}-\\\\d{2}\", ").append(str(v.asText())).append(");\n");
+                } else {
+                    s.append("        ").append(var).append(".stringType(").append(name).append(", ")
+                            .append(str(v.asText())).append(");\n");
+                }
+            } else if (v.isTextual()) {
                 if (ISO_DATE.matcher(v.asText()).matches()) {
                     s.append("        ").append(var).append(".stringMatcher(").append(name)
                             .append(", \"\\\\d{4}-\\\\d{2}-\\\\d{2}\", ").append(str(v.asText())).append(");\n");
@@ -180,7 +206,7 @@ public final class PactTestRenderer {
                 String child = newVar(var + "_" + safe(e.getKey()));
                 s.append("        PactDslJsonBody ").append(child).append(" = ").append(var)
                         .append(".object(").append(name).append(");\n");
-                fields(s, child, v);
+                fields(s, child, v, fs);
                 s.append("        ").append(child).append(".closeObject();\n");
             } else if (v.isArray()) {
                 if (v.isEmpty()) {
@@ -189,21 +215,37 @@ public final class PactTestRenderer {
                     String child = newVar(var + "_" + safe(e.getKey()));
                     s.append("        PactDslJsonBody ").append(child).append(" = ").append(var)
                             .append(".eachLike(").append(name).append(");\n");
-                    fields(s, child, v.get(0));
+                    fields(s, child, v.get(0), fs.path("items"));
                     s.append("        ").append(child).append(".closeObject().closeArray();\n");
                 } else {
                     s.append("        ").append(var).append(".eachLike(").append(name).append(", ")
-                            .append(rootValue(v.get(0))).append(");\n");
+                            .append(rootValue(v.get(0), fs.path("items"))).append(");\n");
                 }
             }
         }
     }
 
-    private static String rootValue(JsonNode v) {
+    private static String rootValue(JsonNode v, JsonNode schema) {
+        String type = schema == null ? "" : schema.path("type").asText("");
+        if (v.isNumber() && type.equals("number")) return "PactDslJsonRootValue.numberType(" + numberLiteral(v) + ")";
+        if (v.isTextual() && type.equals("string")) return "PactDslJsonRootValue.stringType(" + str(v.asText()) + ")";
         if (v.isIntegralNumber()) return "PactDslJsonRootValue.integerType(" + v.asLong() + (v.canConvertToInt() ? "" : "L") + ")";
         if (v.isNumber()) return "PactDslJsonRootValue.decimalType(" + v.asDouble() + ")";
         if (v.isBoolean()) return "PactDslJsonRootValue.booleanType(" + v.asBoolean() + ")";
         return "PactDslJsonRootValue.stringType(" + str(v.asText()) + ")";
+    }
+
+    private static String numberLiteral(JsonNode v) {
+        return v.isIntegralNumber() ? v.asLong() + (v.canConvertToInt() ? "" : "L") : "new java.math.BigDecimal(\"" + v.decimalValue().toPlainString() + "\")";
+    }
+
+    private static JsonNode schema(String json) {
+        if (json == null || json.isBlank()) return MissingNode.getInstance();
+        try {
+            return JSON.readTree(json);
+        } catch (Exception e) {
+            return MissingNode.getInstance();
+        }
     }
 
     private String newVar(String base) {

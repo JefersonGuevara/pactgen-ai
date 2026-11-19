@@ -109,4 +109,26 @@ class CoreTest {
                 .render("pactgen.generated", "api-gateway", "customers-service", op, its).source();
         assertTrue(src.contains(".body(\"{\\\"firstName\\\":\\\"\\\"}\", \"application/json\")"), src);
     }
+
+    @Test
+    void matchersFollowTheOpenApiSchemaNotTheExampleValue() throws Exception {
+        com.fasterxml.jackson.databind.ObjectMapper m = new com.fasterxml.jackson.databind.ObjectMapper();
+        ApiOperation op = new OpenApiLoader().load(SPEC).operations().stream()
+                .filter(o -> o.operationId().equals("createPet")).findFirst().orElseThrow();
+        java.util.List<com.fasterxml.jackson.databind.JsonNode> its = java.util.List.of(m.readTree("""
+                {"description":"alta","providerState":"s","request":{"method":"POST","path":"/owners/1/pets","body":{"name":"Leo","birthDate":"2020-05-15","typeId":1}},"response":{"status":201,"body":{"id":1,"name":"Leo","birthDate":"2020-05-15"}}}"""));
+        String src = new dev.pactgen.core.generator.PactTestRenderer()
+                .render("pactgen.generated", "api-gateway", "customers-service", op, its).source();
+        assertTrue(src.contains("resBody.stringType(\"birthDate\""), "date-time en la respuesta: cualquier texto");
+        assertTrue(src.contains("reqBody.stringMatcher(\"birthDate\""), "date en la petición: regla de fecha");
+    }
+
+    @Test
+    void contextIncludesTheCauseOfEachResponseCode() throws Exception {
+        ApiOperation op = new OpenApiLoader().load(SPEC).operations().stream()
+                .filter(o -> o.operationId().equals("createPet")).findFirst().orElseThrow();
+        String responses = new dev.pactgen.core.context.ContextBuilder(6000)
+                .build(op, "api-gateway", "customers-service").variables().get("responses");
+        assertTrue(responses.contains("- 400 (ownerId menor que 1)"), responses);
+    }
 }

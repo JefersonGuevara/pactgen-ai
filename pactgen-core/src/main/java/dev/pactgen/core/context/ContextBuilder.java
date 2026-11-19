@@ -35,7 +35,8 @@ public final class ContextBuilder {
                 : op.parameters().stream().map(ContextBuilder::param).collect(Collectors.joining("\n")));
         v.put("requestSchema", op.requestBodySchema().isBlank() ? "(sin cuerpo)" : op.requestBodySchema());
         v.put("responses", op.responses().entrySet().stream()
-                .map(e -> "- " + e.getKey() + ": " + (e.getValue().isBlank() ? "(sin cuerpo)" : e.getValue()))
+                .map(e -> "- " + e.getKey() + describe(op, e.getKey()) + ": "
+                        + (e.getValue().isBlank() ? "(sin cuerpo)" : e.getValue()))
                 .collect(Collectors.joining("\n")));
         int chars = v.values().stream().mapToInt(String::length).sum();
         int tokens = chars / 4;
@@ -44,6 +45,12 @@ public final class ContextBuilder {
                     op.operationId(), tokens, tokenBudget);
         }
         return new PromptContext(op, v, tokens);
+    }
+
+    /** Descripción de la respuesta (v1.5): indica al modelo la causa de cada código declarado. */
+    private static String describe(ApiOperation op, String status) {
+        String d = op.responseDescriptions().get(status);
+        return d == null ? "" : " (" + d + ")";
     }
 
     private static String param(ApiParameter p) {

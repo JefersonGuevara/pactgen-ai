@@ -78,15 +78,18 @@ public final class OpenApiLoader {
         }
 
         Map<String, String> responses = new LinkedHashMap<>();
+        Map<String, String> descriptions = new LinkedHashMap<>();
         if (op.getResponses() != null) {
             for (Map.Entry<String, ApiResponse> e : op.getResponses().entrySet()) {
                 responses.put(e.getKey(), toJson(jsonSchema(e.getValue().getContent())));
+                String d = e.getValue().getDescription();
+                if (d != null && !d.isBlank()) descriptions.put(e.getKey(), d.strip().replaceAll("\\s+", " "));
             }
         }
         List<String> tags = op.getTags() != null ? op.getTags() : List.of();
         String summary = op.getSummary() != null ? op.getSummary()
                 : (op.getDescription() != null ? op.getDescription() : "");
-        return new ApiOperation(id, m, path, summary, tags, params, requestSchema, responses);
+        return new ApiOperation(id, m, path, summary, tags, params, requestSchema, responses, descriptions);
     }
 
     private static Schema<?> jsonSchema(Content content) {

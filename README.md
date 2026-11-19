@@ -118,3 +118,11 @@ Motivación: la regla equivalente del prompt v1.1 no se cumplió de forma fiable
 
 - **Cabeceras no declaradas.** Se eliminan de cada petición las cabeceras que el OpenAPI no declara como parámetros `in: header` (se conservan `Content-Type` y `Accept`). Motivo: en statistics-service el modelo añadió `Authorization: Bearer valid-token`, aunque la autenticación no forma parte del contrato. El manifiesto registra `headersRemoved`.
 - **Cuerpos exactos en errores.** En las interacciones con respuesta 4xx/5xx, el cuerpo de la petición se escribe con valores exactos en lugar de reglas por tipo, para que el contrato exprese qué petición concreta produce el error.
+
+## Reglas de coincidencia guiadas por el esquema (v1.4)
+
+El tipo de cada campo en el contrato lo decide el esquema OpenAPI, no el valor de ejemplo del modelo: `format: date` → regla de fecha `yyyy-MM-dd`; cualquier otro `string` (incluido `date-time`) → texto; `integer` → entero; `number` → número (acepta enteros y decimales). Si el esquema no describe un campo, se infiere del valor como antes. Motivo: con la versión anterior, un valor de ejemplo con forma de fecha corta generaba siempre una regla `yyyy-MM-dd`, aunque el campo fuera `date-time`; el tipo del contrato dependía del ejemplo elegido por el modelo y no de la especificación.
+
+## Contexto con la causa de cada código de respuesta (v1.5)
+
+El contexto que recibe el modelo incluye la descripción de cada respuesta del OpenAPI (p. ej., `- 400 (ownerId menor que 1): (sin cuerpo)`). Motivo: en la verificación de la línea base de customers-service, el modelo usó el 400 de `createPet` para un nombre vacío, porque solo veía el código sin su causa; el proveedor real no valida el nombre y respondió 201.

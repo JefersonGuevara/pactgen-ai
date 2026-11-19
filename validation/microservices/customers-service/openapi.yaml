@@ -95,11 +95,14 @@ paths:
           application/json:
             schema: { $ref: '#/components/schemas/PetRequest' }
       responses:
+        # A diferencia de las lecturas, birthDate se serializa con fecha y hora: la entidad devuelta es la construida
+        # a partir de la petición (java.util.Date) y no la leída de la base de datos (java.sql.Date).
+        # Detectado al verificar la línea base contra el proveedor real (2026-11-18).
         '201':
           description: Mascota creada
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Pet' }
+              schema: { $ref: '#/components/schemas/CreatedPet' }
         '400':
           description: ownerId menor que 1
         '404':
@@ -152,6 +155,13 @@ components:
         id: { type: integer, format: int32 }
         name: { type: string }
         birthDate: { type: string, format: date }
+        type: { $ref: '#/components/schemas/PetType' }
+    CreatedPet:
+      type: object
+      properties:
+        id: { type: integer, format: int32 }
+        name: { type: string }
+        birthDate: { type: string, format: date-time, example: '2020-05-15T00:00:00.000+00:00' }
         type: { $ref: '#/components/schemas/PetType' }
     Owner:
       type: object

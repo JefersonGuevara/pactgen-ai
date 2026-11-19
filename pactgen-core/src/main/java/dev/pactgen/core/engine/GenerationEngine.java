@@ -147,7 +147,7 @@ public final class GenerationEngine {
     private Path writeManifest(Request r, ApiModel api, PromptTemplate prompt, LlmClient llm,
                                Instant started, List<OperationResult> results) throws IOException {
         ObjectNode m = JSON.createObjectNode();
-        m.put("tool", "pactgen-ai 0.1.0-SNAPSHOT (v1.3)");
+        m.put("tool", "pactgen-ai 0.1.0-SNAPSHOT (v1.5)");
         m.put("startedAt", started.toString());
         m.put("finishedAt", Instant.now().toString());
         m.put("openapi", r.openapi().toString());
