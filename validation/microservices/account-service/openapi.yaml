@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: account-service (piggymetrics)
+  version: 6bb2cf9
+  description: >
+    Redactado a mano a partir de AccountController, ErrorHandler, AccountServiceImpl y el paquete domain
+    del commit 6bb2cf9 (Spring Boot 2.0.3) para el corpus de PactGen-AI. Context path: /accounts.
+    Consumidor real: notification-service (AccountServiceClient usa GET /accounts/{name}); las demás operaciones
+    las usa el frontend a través del gateway.
+    Seguridad: todas las operaciones exigen un token OAuth2 Bearer; GET /accounts/{name} exige además el scope
+    "server" (o name = demo). La autenticación no forma parte del contrato: el proveedor la resuelve en la
+    verificación con un filtro de petición.
+    Las fechas se serializan en ISO-8601 (configuración por defecto de Spring Boot 2.0).
+    Si la cuenta no existe, las operaciones GET devuelven 200 sin cuerpo (no 404).
+paths:
+  /accounts/{name}:
+    get:
+      operationId: getAccountByName
+      summary: Obtiene la cuenta de un usuario por nombre
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Cuenta encontrada (cuerpo vacío si no existe)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Account' }
+  /accounts/current:
+    get:
+      operationId: getCurrentAccount
+      summary: Obtiene la cuenta del usuario autenticado
+      responses:
+        '200':
+          description: Cuenta del usuario autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Account' }
+    put:
+      operationId: saveCurrentAccount
+      summary: Guarda los cambios en la cuenta del usuario autenticado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AccountUpdate' }
+      responses:
+        '200':
+          description: Cambios guardados (sin cuerpo)
+        '400':
+          description: Datos inválidos o la cuenta no existe
+  /accounts/:
+    post:
+      operationId: createNewAccount
+      summary: Registra un usuario nuevo y crea su cuenta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/User' }
+      responses:
+        '200':
+          description: Cuenta creada con ahorro inicial a cero
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Account' }
+        '400':
+          description: Datos inválidos o la cuenta ya existe
+components:
+  schemas:
+    User:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string, minLength: 3, maxLength: 20, example: 'ana' }
+        password: { type: string, minLength: 6, maxLength: 40, example: 'secreto123' }
+    Account:
+      type: object
+      required: [name, saving]
+      properties:
+        name: { type: string, example: 'ana' }
+        lastSeen: { type: string, format: date-time, example: '2026-11-18T15:30:00.000+0000' }
+        incomes:
+          type: array
+          items: { $ref: '#/components/schemas/Item' }
+        expenses:
+          type: array
+          items: { $ref: '#/components/schemas/Item' }
+        saving: { $ref: '#/components/schemas/Saving' }
+        note: { type: string, maxLength: 20000, example: 'Ahorro para vacaciones' }
+    AccountUpdate:
+      type: object
+      required: [saving]
+      properties:
+        incomes:
+          type: array
+          items: { $ref: '#/components/schemas/Item' }
+        expenses:
+          type: array
+          items: { $ref: '#/components/schemas/Item' }
+        saving: { $ref: '#/components/schemas/Saving' }
+        note: { type: string, maxLength: 20000 }
+    Item:
+      type: object
+      required: [title, amount, currency, period, icon]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 20, example: 'Salario' }
+        amount: { type: number, example: 3000.00 }
+        currency: { type: string, enum: [USD, EUR, RUB], example: 'USD' }
+        period: { type: string, enum: [YEAR, QUARTER, MONTH, DAY, HOUR], example: 'MONTH' }
+        icon: { type: string, example: 'wallet' }
+    Saving:
+      type: object
+      required: [amount, currency, interest, deposit, capitalization]
+      properties:
+        amount: { type: number, example: 1500.00 }
+        currency: { type: string, enum: [USD, EUR, RUB], example: 'USD' }
+        interest: { type: number, example: 3.5 }
+        deposit: { type: boolean, example: true }
+        capitalization: { type: boolean, example: false }

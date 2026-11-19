@@ -100,6 +100,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Pet' }
+        '400':
+          description: ownerId menor que 1
         '404':
           description: Propietario no encontrado
   /owners/{ownerId}/pets/{petId}:

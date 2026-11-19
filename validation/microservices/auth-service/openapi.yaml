@@ -1,0 +1,59 @@
+openapi: 3.0.3
+info:
+  title: auth-service (piggymetrics)
+  version: 6bb2cf9
+  description: >
+    Redactado a mano a partir de UserController, UserServiceImpl y domain.User del commit 6bb2cf9
+    (Spring Boot 2.0.3) para el corpus de PactGen-AI. Context path: /uaa.
+    Consumidor real: account-service (AuthServiceClient usa POST /uaa/users al registrar una cuenta);
+    GET /uaa/users/current lo usan los demás servicios como endpoint de información de usuario de OAuth2.
+    Seguridad: todas las operaciones exigen un token OAuth2 Bearer; POST exige el scope "server". La
+    autenticación no forma parte del contrato.
+    domain.User no tiene restricciones de Bean Validation; un usuario duplicado lanza IllegalArgumentException,
+    que el servicio no maneja, por lo que responde 500.
+paths:
+  /uaa/users/current:
+    get:
+      operationId: getCurrentUser
+      summary: Devuelve el principal OAuth2 del usuario autenticado
+      responses:
+        '200':
+          description: Principal del usuario autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Principal' }
+  /uaa/users:
+    post:
+      operationId: createUser
+      summary: Crea las credenciales de un usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/User' }
+      responses:
+        '200':
+          description: Usuario creado (sin cuerpo)
+        '500':
+          description: El usuario ya existe (excepción no manejada)
+components:
+  schemas:
+    User:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string, example: 'ana' }
+        password: { type: string, example: 'secreto123' }
+    Principal:
+      type: object
+      required: [name, authenticated]
+      description: Serialización de OAuth2Authentication; se describen solo los campos estables.
+      properties:
+        name: { type: string, example: 'ana' }
+        authenticated: { type: boolean, example: true }
+        authorities:
+          type: array
+          items:
+            type: object
+            properties:
+              authority: { type: string, example: 'ROLE_USER' }

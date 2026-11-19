@@ -67,8 +67,11 @@ public class PactGenCli implements Runnable {
                 GenerationEngine.Summary s = new GenerationEngine().run(new GenerationEngine.Request(
                         openapi, consumer, this.provider, new HashSet<>(include), out, testPackage, llm,
                         maxRepairs, promptVersion, tokenBudget, !noDedupe));
-                System.out.printf("Operaciones: %d | generadas: %d | interacciones: %d (redundantes descartadas: %d) | costo estimado: USD %.4f%nManifiesto: %s%n",
-                        s.operations(), s.generated(), s.interactions(), s.duplicatesRemoved(), s.costUsd(), s.manifest());
+                String costo = provider.equals("replay")
+                        ? String.format("costo original: USD %.4f (replay: USD 0 gastados)", s.costUsd())
+                        : String.format("costo estimado: USD %.4f", s.costUsd());
+                System.out.printf("Operaciones: %d | generadas: %d | interacciones: %d (redundantes descartadas: %d) | %s%nManifiesto: %s%n",
+                        s.operations(), s.generated(), s.interactions(), s.duplicatesRemoved(), costo, s.manifest());
                 if (archive != null) {
                     Path dir = RunArchiver.archive(archive, s, this.provider, llm.model(), promptVersion);
                     System.out.println("Archivado en: " + dir);

@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  title: statistics-service (piggymetrics)
+  version: 6bb2cf9
+  description: >
+    Redactado a mano a partir de StatisticsController y los paquetes domain y domain.timeseries del commit
+    6bb2cf9 (Spring Boot 2.0.3) para el corpus de PactGen-AI. Context path: /statistics.
+    Consumidor real: account-service (StatisticsServiceClient usa PUT /statistics/{accountName}); las operaciones
+    GET las usa el frontend a través del gateway.
+    Seguridad: todas las operaciones exigen un token OAuth2 Bearer; PUT exige el scope "server". La autenticación
+    no forma parte del contrato.
+    Las fechas se serializan en ISO-8601. Si no hay datos, las operaciones GET devuelven una lista vacía.
+paths:
+  /statistics/current:
+    get:
+      operationId: getCurrentAccountStatistics
+      summary: Serie temporal diaria de la cuenta del usuario autenticado
+      responses:
+        '200':
+          description: Puntos de la serie (lista vacía si no hay datos)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DataPoint' }
+  /statistics/{accountName}:
+    parameters:
+      - name: accountName
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      operationId: getStatisticsByAccountName
+      summary: Serie temporal diaria de una cuenta
+      responses:
+        '200':
+          description: Puntos de la serie (lista vacía si no hay datos)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DataPoint' }
+    put:
+      operationId: saveAccountStatistics
+      summary: Registra el estado actual de una cuenta como punto de la serie del día
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Account' }
+      responses:
+        '200':
+          description: Punto registrado (sin cuerpo)
+        '400':
+          description: Datos inválidos (faltan incomes, expenses o saving, o un ítem no es válido)
+components:
+  schemas:
+    Account:
+      type: object
+      required: [incomes, expenses, saving]
+      properties:
+        incomes:
+          type: array
+          items: { $ref: '#/components/schemas/Item' }
+        expenses:
+          type: array
+          items: { $ref: '#/components/schemas/Item' }
+        saving: { $ref: '#/components/schemas/Saving' }
+    Item:
+      type: object
+      required: [title, amount, currency, period]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 20, example: 'Salario' }
+        amount: { type: number, example: 3000.00 }
+        currency: { type: string, enum: [USD, EUR, RUB], example: 'USD' }
+        period: { type: string, enum: [YEAR, QUARTER, MONTH, DAY, HOUR], example: 'MONTH' }
+    Saving:
+      type: object
+      required: [amount, currency, interest, deposit, capitalization]
+      properties:
+        amount: { type: number, example: 1500.00 }
+        currency: { type: string, enum: [USD, EUR, RUB], example: 'USD' }
+        interest: { type: number, example: 3.5 }
+        deposit: { type: boolean, example: true }
+        capitalization: { type: boolean, example: false }
+    DataPoint:
+      type: object
+      required: [id, incomes, expenses, statistics, rates]
+      properties:
+        id:
+          type: object
+          required: [account, date]
+          properties:
+            account: { type: string, example: 'ana' }
+            date: { type: string, format: date-time, example: '2026-11-18T00:00:00.000+0000' }
+        incomes:
+          type: array
+          items: { $ref: '#/components/schemas/ItemMetric' }
+        expenses:
+          type: array
+          items: { $ref: '#/components/schemas/ItemMetric' }
+        statistics:
+          type: object
+          description: Totales normalizados a USD y a un día
+          properties:
+            INCOMES_AMOUNT: { type: number, example: 98.56 }
+            EXPENSES_AMOUNT: { type: number, example: 45.20 }
+            SAVING_AMOUNT: { type: number, example: 1500.00 }
+        rates:
+          type: object
+          description: Tipos de cambio del día respecto a USD
+          properties:
+            USD: { type: number, example: 1 }
+            EUR: { type: number, example: 0.92 }
+            RUB: { type: number, example: 91.5 }
+    ItemMetric:
+      type: object
+      required: [title, amount]
+      properties:
+        title: { type: string, example: 'Salario' }
+        amount: { type: number, example: 98.56 }
