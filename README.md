@@ -122,7 +122,3 @@ Motivación: la regla equivalente del prompt v1.1 no se cumplió de forma fiable
 ## Reglas de coincidencia guiadas por el esquema (v1.4)
 
 El tipo de cada campo en el contrato lo decide el esquema OpenAPI, no el valor de ejemplo del modelo: `format: date` → regla de fecha `yyyy-MM-dd`; cualquier otro `string` (incluido `date-time`) → texto; `integer` → entero; `number` → número (acepta enteros y decimales). Si el esquema no describe un campo, se infiere del valor como antes. Motivo: con la versión anterior, un valor de ejemplo con forma de fecha corta generaba siempre una regla `yyyy-MM-dd`, aunque el campo fuera `date-time`; el tipo del contrato dependía del ejemplo elegido por el modelo y no de la especificación.
-
-## Contexto con la causa de cada código de respuesta (v1.5)
-
-El contexto que recibe el modelo incluye la descripción de cada respuesta del OpenAPI (p. ej., `- 400 (ownerId menor que 1): (sin cuerpo)`). Motivo: en la verificación de la línea base de customers-service, el modelo usó el 400 de `createPet` para un nombre vacío, porque solo veía el código sin su causa; el proveedor real no valida el nombre y respondió 201.
