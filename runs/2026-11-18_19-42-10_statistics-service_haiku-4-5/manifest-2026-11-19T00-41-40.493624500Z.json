@@ -1,0 +1,53 @@
+{
+  "tool" : "pactgen-ai 0.1.0-SNAPSHOT (v1.2)",
+  "startedAt" : "2026-11-19T00:41:40.493624500Z",
+  "finishedAt" : "2026-11-19T00:42:10.532070600Z",
+  "openapi" : "validation\\microservices\\statistics-service\\openapi.yaml",
+  "openapiSha256" : "b24651c3eb6d399de8d2bdb9be813121ee71d7f18347a1af99922c14dee21404",
+  "apiTitle" : "statistics-service (piggymetrics)",
+  "apiVersion" : "6bb2cf9",
+  "consumer" : "account-service",
+  "provider" : "statistics-service",
+  "model" : {
+    "provider" : "anthropic",
+    "id" : "claude-haiku-4-5-20251001",
+    "temperature" : 0.2,
+    "maxTokens" : 4096,
+    "maxRepairs" : 2
+  },
+  "dedupe" : true,
+  "promptVersion" : "v1.1",
+  "promptSha256" : "55da1f57c2d633581f2ecf2753bb74fcedc368a35c4fa530c15eb888ade082cd",
+  "operations" : [ {
+    "operationId" : "getCurrentAccountStatistics",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 3,
+    "inputTokens" : 2418,
+    "outputTokens" : 1773,
+    "costUsd" : 0.011283,
+    "lastErrors" : [ ],
+    "duplicatesRemoved" : 1
+  }, {
+    "operationId" : "getStatisticsByAccountName",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 3,
+    "inputTokens" : 2427,
+    "outputTokens" : 1172,
+    "costUsd" : 0.008287,
+    "lastErrors" : [ ],
+    "duplicatesRemoved" : 0
+  }, {
+    "operationId" : "saveAccountStatistics",
+    "status" : "generated",
+    "attempts" : 1,
+    "interactions" : 3,
+    "inputTokens" : 2484,
+    "outputTokens" : 1339,
+    "costUsd" : 0.009179,
+    "lastErrors" : [ ],
+    "duplicatesRemoved" : 1
+  } ],
+  "totalCostUsd" : 0.028748999999999997
+}
