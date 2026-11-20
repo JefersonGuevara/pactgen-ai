@@ -1,0 +1,29 @@
+openapi: 3.0.3
+info: { title: secured, version: '1' }
+security:
+  - bearer: []
+paths:
+  /items/{id}:
+    get:
+      operationId: getItem
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: ok }
+  /public:
+    get:
+      operationId: getPublic
+      security: []
+      responses:
+        '200': { description: ok }
+  /keys:
+    get:
+      operationId: getWithKey
+      security:
+        - apiKey: []
+      responses:
+        '200': { description: ok }
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer }
+    apiKey: { type: apiKey, in: header, name: X-API-Key }

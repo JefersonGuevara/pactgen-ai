@@ -17,10 +17,12 @@ Sirve para medir BC_recall y FP_rate (memoria, secciones 3.4.4 y 3.4.6): un cont
 .\validation\provider-verification\verificar.ps1 -Proveedor P1 -Pacts <carpeta> -Rama bc/customers-service/BC1
 ```
 
+**Modo a ciegas** (`-Ciego`): para los proveedores del grupo A (P2, P3, P5), cuyas pruebas generadas el autor no debe ver antes del experimento, la salida de Maven se guarda en `target/verificacion.log` del proveedor y en pantalla solo aparecen los totales. Si hay fallos, el registro lo revisa un tercero, y solo se corrige el OpenAPI o el arnés, nunca las pruebas.
+
 ## Estado
 
 | Proveedor | Arnés |
 |---|---|
 | P1 customers-service | `customers-service/CustomersContractVerificationTest.java` |
-| P2 visits-service | pendiente |
+| P2 visits-service | `visits-service/VisitsContractVerificationTest.java` |
 | P3–P5 (piggymetrics, Spring Boot 2.0) | pendiente: requiere decidir entre ejecutar en Java 8/Pact 4.1 o portar los controladores |

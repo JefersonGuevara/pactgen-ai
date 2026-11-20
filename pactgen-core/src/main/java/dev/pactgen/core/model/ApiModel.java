@@ -15,15 +15,17 @@ public final class ApiModel {
      *
      * @param responses código de estado (como texto: "200", "404", "default") → esquema JSON del cuerpo, o "" si no tiene
      * @param responseDescriptions código de estado → descripción de la respuesta en el OpenAPI (causa del código)
+     * @param securityHeaders cabeceras (en minúsculas) que exigen los esquemas de seguridad de la operación
      */
     public record ApiOperation(String operationId, String method, String path, String summary,
                                List<String> tags, List<ApiParameter> parameters,
                                String requestBodySchema, Map<String, String> responses,
-                               Map<String, String> responseDescriptions) {
+                               Map<String, String> responseDescriptions, java.util.Set<String> securityHeaders) {
 
         public ApiOperation(String operationId, String method, String path, String summary, List<String> tags,
                             List<ApiParameter> parameters, String requestBodySchema, Map<String, String> responses) {
-            this(operationId, method, path, summary, tags, parameters, requestBodySchema, responses, Map.of());
+            this(operationId, method, path, summary, tags, parameters, requestBodySchema, responses, Map.of(),
+                    java.util.Set.of());
         }
 
         public boolean declaresStatus(int status) {

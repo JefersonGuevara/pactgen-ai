@@ -131,4 +131,23 @@ class CoreTest {
                 .build(op, "api-gateway", "customers-service").variables().get("responses");
         assertTrue(responses.contains("- 400 (ownerId menor que 1)"), responses);
     }
+
+    @Test
+    void headerFilterKeepsHeadersRequiredBySecuritySchemes() throws Exception {
+        com.fasterxml.jackson.databind.ObjectMapper m = new com.fasterxml.jackson.databind.ObjectMapper();
+        java.util.Map<String, ApiOperation> ops = new java.util.HashMap<>();
+        new OpenApiLoader().load(Path.of("src/test/resources/fixtures/secured.yaml")).operations()
+                .forEach(o -> ops.put(o.operationId(), o));
+        String req = """
+                {"request":{"method":"GET","path":"/x","headers":{"Authorization":"Bearer t","X-API-Key":"k"}},"response":{"status":200}}""";
+        java.util.List<com.fasterxml.jackson.databind.JsonNode> secured = java.util.List.of(m.readTree(req));
+        java.util.List<com.fasterxml.jackson.databind.JsonNode> open = java.util.List.of(m.readTree(req));
+        java.util.List<com.fasterxml.jackson.databind.JsonNode> keyed = java.util.List.of(m.readTree(req));
+        dev.pactgen.core.validation.HeaderFilter f = new dev.pactgen.core.validation.HeaderFilter();
+        assertEquals(1, f.filter(secured, ops.get("getItem")), "seguridad global bearer: se conserva Authorization");
+        assertTrue(secured.get(0).path("request").path("headers").has("Authorization"));
+        assertEquals(2, f.filter(open, ops.get("getPublic")), "security: [] elimina ambas");
+        assertEquals(1, f.filter(keyed, ops.get("getWithKey")), "apiKey en cabecera: se conserva X-API-Key");
+        assertTrue(keyed.get(0).path("request").path("headers").has("X-API-Key"));
+    }
 }

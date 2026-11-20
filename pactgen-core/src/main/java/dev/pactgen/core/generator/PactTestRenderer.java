@@ -18,6 +18,20 @@ public final class PactTestRenderer {
 
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final Pattern ISO_DATE = Pattern.compile("\\d{4}-\\d{2}-\\d{2}");
+    /** ISO 8601 con hora y zona; acepta +00:00 y +0000 (las dos variantes del corpus) y Z. */
+    static final String DATE_TIME_REGEX = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:?\\d{2})";
+    private static final Pattern ISO_DATE_TIME = Pattern.compile(DATE_TIME_REGEX);
+
+    /** false = generación sin las reglas deterministas de v1.3–v1.4 (solo para el análisis de ablación). */
+    private final boolean schemaGuided;
+
+    public PactTestRenderer() {
+        this(true);
+    }
+
+    public PactTestRenderer(boolean schemaGuided) {
+        this.schemaGuided = schemaGuided;
+    }
     private int varCounter;
 
     public record Rendered(String className, String source) {}
@@ -70,12 +84,12 @@ public final class PactTestRenderer {
             varCounter = 0;
             // En las respuestas de error (4xx/5xx) el cuerpo de la petición se fija con valores exactos (v1.3):
             // el contrato debe decir "esta petición concreta produce el error", no "cualquier cuerpo con esta forma".
-            boolean exactRequest = res.path("status").asInt() >= 400 && hasBody(req.path("body"));
+            boolean exactRequest = schemaGuided && res.path("status").asInt() >= 400 && hasBody(req.path("body"));
             String reqBody = exactRequest
                     ? str(compact(req.path("body"))) + ", \"application/json\""
-                    : bodyVar(s, req.path("body"), "req", schema(op.requestBodySchema()));
+                    : bodyVar(s, req.path("body"), "req", schemaGuided ? schema(op.requestBodySchema()) : MissingNode.getInstance());
             String resBody = bodyVar(s, res.path("body"), "res",
-                    schema(op.responses().get(String.valueOf(res.path("status").asInt()))));
+                    schemaGuided ? schema(op.responses().get(String.valueOf(res.path("status").asInt()))) : MissingNode.getInstance());
             s.append("        return builder\n");
             s.append("            .given(").append(str(it.path("providerState").asText())).append(")\n");
             s.append("            .uponReceiving(").append(str(it.path("description").asText())).append(")\n");
@@ -179,6 +193,10 @@ public final class PactTestRenderer {
                 if (format.equals("date") && ISO_DATE.matcher(v.asText()).matches()) {
                     s.append("        ").append(var).append(".stringMatcher(").append(name)
                             .append(", \"\\\\d{4}-\\\\d{2}-\\\\d{2}\", ").append(str(v.asText())).append(");\n");
+                } else if (format.equals("date-time") && ISO_DATE_TIME.matcher(v.asText()).matches()) {
+                    // v1.6: fecha y hora ISO 8601 en lugar de texto libre
+                    s.append("        ").append(var).append(".stringMatcher(").append(name).append(", ")
+                            .append(str(DATE_TIME_REGEX)).append(", ").append(str(v.asText())).append(");\n");
                 } else {
                     s.append("        ").append(var).append(".stringType(").append(name).append(", ")
                             .append(str(v.asText())).append(");\n");

@@ -55,6 +55,9 @@ public class PactGenCli implements Runnable {
         @Option(names = "--no-dedupe", negatable = false, description = "Desactiva el filtro de interacciones redundantes "
                 + "(solo para comparar; por defecto activo)")
         boolean noDedupe;
+        @Option(names = "--no-filters", negatable = false, description = "Desactiva todos los filtros deterministas "
+                + "(redundantes, cabeceras, cuerpos exactos y reglas guiadas por el esquema). Solo para ablación")
+        boolean noFilters;
         @Option(names = "--token-budget", defaultValue = "6000") int tokenBudget;
 
         @Override
@@ -66,7 +69,7 @@ public class PactGenCli implements Runnable {
             try {
                 GenerationEngine.Summary s = new GenerationEngine().run(new GenerationEngine.Request(
                         openapi, consumer, this.provider, new HashSet<>(include), out, testPackage, llm,
-                        maxRepairs, promptVersion, tokenBudget, !noDedupe));
+                        maxRepairs, promptVersion, tokenBudget, !noDedupe, !noFilters));
                 String costo = provider.equals("replay")
                         ? String.format("costo original: USD %.4f (replay: USD 0 gastados)", s.costUsd())
                         : String.format("costo estimado: USD %.4f", s.costUsd());

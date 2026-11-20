@@ -51,14 +51,14 @@ public final class OpenApiLoader {
         List<ApiOperation> ops = new ArrayList<>();
         if (api.getPaths() != null) {
             api.getPaths().forEach((path, item) -> item.readOperationsMap()
-                    .forEach((method, op) -> ops.add(toOperation(path, item, method, op))));
+                    .forEach((method, op) -> ops.add(toOperation(path, item, method, op, api))));
         }
         String title = api.getInfo() != null ? api.getInfo().getTitle() : "";
         String version = api.getInfo() != null ? api.getInfo().getVersion() : "";
         return new ApiModel(title, version, ops);
     }
 
-    private ApiOperation toOperation(String path, PathItem item, PathItem.HttpMethod method, Operation op) {
+    private ApiOperation toOperation(String path, PathItem item, PathItem.HttpMethod method, Operation op, OpenAPI api) {
         String m = method.name().toUpperCase(Locale.ROOT);
         String id = op.getOperationId() != null ? op.getOperationId()
                 : (m.toLowerCase(Locale.ROOT) + path.replaceAll("[^A-Za-z0-9]+", "_"));
@@ -89,7 +89,36 @@ public final class OpenApiLoader {
         List<String> tags = op.getTags() != null ? op.getTags() : List.of();
         String summary = op.getSummary() != null ? op.getSummary()
                 : (op.getDescription() != null ? op.getDescription() : "");
-        return new ApiOperation(id, m, path, summary, tags, params, requestSchema, responses, descriptions);
+        return new ApiOperation(id, m, path, summary, tags, params, requestSchema, responses, descriptions,
+                securityHeaders(op, api));
+    }
+
+    /**
+     * Cabeceras que exigen los esquemas de seguridad aplicables a la operación (v1.6): http (bearer/basic) y
+     * oauth2/openIdConnect → Authorization; apiKey en cabecera → su nombre. Se usan para no eliminar esas
+     * cabeceras en el filtro de cabeceras no declaradas.
+     */
+    private static java.util.Set<String> securityHeaders(Operation op, OpenAPI api) {
+        java.util.Set<String> out = new java.util.TreeSet<>();
+        List<io.swagger.v3.oas.models.security.SecurityRequirement> reqs =
+                op.getSecurity() != null ? op.getSecurity() : api.getSecurity();
+        if (reqs == null || api.getComponents() == null || api.getComponents().getSecuritySchemes() == null) return out;
+        for (io.swagger.v3.oas.models.security.SecurityRequirement req : reqs) {
+            for (String name : req.keySet()) {
+                io.swagger.v3.oas.models.security.SecurityScheme sc = api.getComponents().getSecuritySchemes().get(name);
+                if (sc == null || sc.getType() == null) continue;
+                switch (sc.getType()) {
+                    case HTTP, OAUTH2, OPENIDCONNECT -> out.add("authorization");
+                    case APIKEY -> {
+                        if (sc.getIn() == io.swagger.v3.oas.models.security.SecurityScheme.In.HEADER && sc.getName() != null) {
+                            out.add(sc.getName().toLowerCase(Locale.ROOT));
+                        }
+                    }
+                    default -> { }
+                }
+            }
+        }
+        return out;
     }
 
     private static Schema<?> jsonSchema(Content content) {

@@ -38,11 +38,20 @@ public final class GenerationEngine {
     /** Parámetros de una ejecución de {@code generate}. */
     public record Request(Path openapi, String consumer, String provider, Set<String> include,
                           Path outDir, String testPackage, LlmConfig llm, int maxRepairs,
-                          String promptVersion, int tokenBudget, boolean dedupe) {}
+                          String promptVersion, int tokenBudget, boolean dedupe, boolean filters) {
+
+        /** Por defecto, con los filtros deterministas activos. */
+        public Request(Path openapi, String consumer, String provider, Set<String> include, Path outDir,
+                       String testPackage, LlmConfig llm, int maxRepairs, String promptVersion, int tokenBudget,
+                       boolean dedupe) {
+            this(openapi, consumer, provider, include, outDir, testPackage, llm, maxRepairs, promptVersion,
+                    tokenBudget, dedupe, true);
+        }
+    }
 
     public record OperationResult(String operationId, String status, int attempts, int interactions,
                                   int inputTokens, int outputTokens, double costUsd, List<String> lastErrors,
-                                  int duplicatesRemoved, int headersRemoved) {}
+                                  int duplicatesRemoved, int headersRemoved, String modelReported) {}
 
     /** Resultado agregado; incluye los archivos escritos en esta ejecución para poder archivarlos. */
     public record Summary(int operations, int generated, double costUsd, Path manifest,
@@ -56,7 +65,7 @@ public final class GenerationEngine {
         LlmClient llm = r.llm().createClient();
         ContextBuilder contexts = new ContextBuilder(r.tokenBudget());
         OutputValidator validator = new OutputValidator();
-        PactTestRenderer renderer = new PactTestRenderer();
+        PactTestRenderer renderer = new PactTestRenderer(r.filters());
 
         Path rawDir = r.outDir().resolve("pactgen/raw");
         Path testDir = r.outDir().resolve("src/test/java").resolve(r.testPackage().replace('.', '/'));
@@ -88,6 +97,7 @@ public final class GenerationEngine {
         PromptContext ctx = contexts.build(op, r.consumer(), r.provider());
         String user = prompt.user(ctx.variables());
         int in = 0, out = 0, attempt = 0;
+        String modelReported = "";
         List<String> errors = List.of();
         OutputValidator.Result result = null;
         String lastText = "";
@@ -100,8 +110,9 @@ public final class GenerationEngine {
             } catch (Exception e) {
                 System.err.println("[engine] " + op.operationId() + ": error al invocar el modelo: " + e.getMessage());
                 return new OperationResult(op.operationId(), "llm_error", attempt + 1, 0, in, out,
-                        Pricing.costUsd(llm.modelId(), in, out), List.of(String.valueOf(e.getMessage())), 0, 0);
+                        Pricing.costUsd(llm.modelId(), in, out), List.of(String.valueOf(e.getMessage())), 0, 0, "");
             }
+            modelReported = reportedModel(resp.rawJson(), modelReported);
             in += resp.inputTokens();
             out += resp.outputTokens();
             lastText = resp.text();
@@ -116,13 +127,13 @@ public final class GenerationEngine {
         }
         double cost = Pricing.costUsd(llm.modelId(), in, out);
         if (result == null || !result.valid()) {
-            return new OperationResult(op.operationId(), "invalid", attempt, 0, in, out, cost, errors, 0, 0);
+            return new OperationResult(op.operationId(), "invalid", attempt, 0, in, out, cost, errors, 0, 0, modelReported);
         }
         List<JsonNode> interactions = new ArrayList<>();
         result.output().path("interactions").forEach(interactions::add);
-        int headersRemoved = new HeaderFilter().filter(interactions, op);
+        int headersRemoved = r.filters() ? new HeaderFilter().filter(interactions, op) : 0;
         int removed = 0;
-        if (r.dedupe()) {
+        if (r.dedupe() && r.filters()) {
             InteractionDeduplicator.Result d = new InteractionDeduplicator().dedupe(interactions);
             interactions = d.kept();
             removed = d.removed();
@@ -132,7 +143,29 @@ public final class GenerationEngine {
         Files.writeString(testFile, test.source());
         testFiles.add(testFile);
         return new OperationResult(op.operationId(), "generated", attempt, interactions.size(), in, out, cost,
-                List.of(), removed, headersRemoved);
+                List.of(), removed, headersRemoved, modelReported);
+    }
+
+    /** Modelo que declara la propia respuesta de la API (campo "model"); detecta cambios del proveedor. */
+    private static String reportedModel(String rawJson, String previous) {
+        try {
+            String m = JSON.readTree(rawJson).path("model").asText("");
+            return m.isBlank() ? previous : m;
+        } catch (Exception e) {
+            return previous;
+        }
+    }
+
+    private static String libraryVersion(String groupId, String artifactId) {
+        String res = "META-INF/maven/" + groupId + "/" + artifactId + "/pom.properties";
+        try (java.io.InputStream in = GenerationEngine.class.getClassLoader().getResourceAsStream(res)) {
+            if (in == null) return "desconocida";
+            java.util.Properties p = new java.util.Properties();
+            p.load(in);
+            return p.getProperty("version", "desconocida");
+        } catch (IOException e) {
+            return "desconocida";
+        }
     }
 
     private static void archive(Path file, LlmResponse resp) throws IOException {
@@ -147,7 +180,7 @@ public final class GenerationEngine {
     private Path writeManifest(Request r, ApiModel api, PromptTemplate prompt, LlmClient llm,
                                Instant started, List<OperationResult> results) throws IOException {
         ObjectNode m = JSON.createObjectNode();
-        m.put("tool", "pactgen-ai 0.1.0-SNAPSHOT (v1.5)");
+        m.put("tool", "pactgen-ai 0.1.0-SNAPSHOT (v1.6)");
         m.put("startedAt", started.toString());
         m.put("finishedAt", Instant.now().toString());
         m.put("openapi", r.openapi().toString());
@@ -163,6 +196,12 @@ public final class GenerationEngine {
         model.put("maxTokens", r.llm().maxTokens());
         model.put("maxRepairs", r.maxRepairs());
         m.put("dedupe", r.dedupe());
+        m.put("filters", r.filters());
+        ObjectNode env = m.putObject("environment");
+        env.put("java", System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
+        env.put("os", System.getProperty("os.name") + " " + System.getProperty("os.version"));
+        env.put("swaggerParser", libraryVersion("io.swagger.parser.v3", "swagger-parser-v3"));
+        env.put("jackson", com.fasterxml.jackson.databind.cfg.PackageVersion.VERSION.toString());
         m.put("promptVersion", prompt.version());
         m.put("promptSha256", prompt.sha256());
         ArrayNode ops = m.putArray("operations");
