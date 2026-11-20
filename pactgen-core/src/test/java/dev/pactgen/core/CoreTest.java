@@ -107,7 +107,7 @@ class CoreTest {
                 {"description":"sin nombre","providerState":"s","request":{"method":"POST","path":"/owners","body":{"firstName":""}},"response":{"status":400}}"""));
         String src = new dev.pactgen.core.generator.PactTestRenderer()
                 .render("pactgen.generated", "api-gateway", "customers-service", op, its).source();
-        assertTrue(src.contains(".body(\"{\\\"firstName\\\":\\\"\\\"}\", \"application/json\")"), src);
+        assertTrue(src.contains(".body(\"{\\\"firstName\\\":\\\"\\\"}\", \"application/json; charset=UTF-8\")"), src);
     }
 
     @Test

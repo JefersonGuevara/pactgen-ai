@@ -22,6 +22,12 @@ public final class PactTestRenderer {
     static final String DATE_TIME_REGEX = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:?\\d{2})";
     private static final Pattern ISO_DATE_TIME = Pattern.compile(DATE_TIME_REGEX);
 
+    /**
+     * Content-Type de las peticiones con cuerpo (v1.7). Sin charset, el servidor simulado de Pact decodifica el
+     * cuerpo como ISO-8859-1 y los textos con tildes no coinciden en los cuerpos exactos.
+     */
+    static final String JSON_UTF8 = "application/json; charset=UTF-8";
+
     /** false = generación sin las reglas deterministas de v1.3–v1.4 (solo para el análisis de ablación). */
     private final boolean schemaGuided;
 
@@ -86,7 +92,7 @@ public final class PactTestRenderer {
             // el contrato debe decir "esta petición concreta produce el error", no "cualquier cuerpo con esta forma".
             boolean exactRequest = schemaGuided && res.path("status").asInt() >= 400 && hasBody(req.path("body"));
             String reqBody = exactRequest
-                    ? str(compact(req.path("body"))) + ", \"application/json\""
+                    ? str(compact(req.path("body"))) + ", " + str(JSON_UTF8)
                     : bodyVar(s, req.path("body"), "req", schemaGuided ? schema(op.requestBodySchema()) : MissingNode.getInstance());
             String resBody = bodyVar(s, res.path("body"), "res",
                     schemaGuided ? schema(op.responses().get(String.valueOf(res.path("status").asInt()))) : MissingNode.getInstance());
@@ -98,12 +104,12 @@ public final class PactTestRenderer {
             if (req.path("query").isObject() && !req.path("query").isEmpty()) {
                 s.append("            .query(").append(str(queryString(req.path("query")).substring(1))).append(")\n");
             }
-            String reqHeaders = headers(req.path("headers"), reqBody != null);
+            String reqHeaders = headers(req.path("headers"), reqBody != null, true);
             if (reqHeaders != null) s.append("            .headers(").append(reqHeaders).append(")\n");
             if (reqBody != null) s.append("            .body(").append(reqBody).append(")\n");
             s.append("            .willRespondWith()\n");
             s.append("            .status(").append(res.path("status").asInt()).append(")\n");
-            String resHeaders = headers(res.path("headers"), resBody != null);
+            String resHeaders = headers(res.path("headers"), resBody != null, false);
             if (resHeaders != null) s.append("            .headers(").append(resHeaders).append(")\n");
             if (resBody != null) s.append("            .body(").append(resBody).append(")\n");
             s.append("            .toPact(V4Pact.class);\n");
@@ -124,7 +130,7 @@ public final class PactTestRenderer {
                 }
             }
             if (reqBody != null) {
-                s.append("        request.header(\"Content-Type\", \"application/json\");\n");
+                s.append("        request.header(\"Content-Type\", ").append(str(JSON_UTF8)).append(");\n");
                 s.append("        request.method(").append(str(req.path("method").asText().toUpperCase()))
                         .append(", HttpRequest.BodyPublishers.ofString(").append(str(compact(req.path("body")))).append("));\n");
             } else {
@@ -270,19 +276,27 @@ public final class PactTestRenderer {
         return safe(base) + (varCounter++);
     }
 
-    private static String headers(JsonNode h, boolean hasBody) {
+    /**
+     * Cabeceras de la petición o de la respuesta. En la petición, el Content-Type lo fija la herramienta
+     * (v1.7, con charset) para que coincida con lo que envía la prueba; en la respuesta se respeta el del
+     * modelo o, si no hay, application/json, que es lo que devuelve Spring.
+     */
+    private static String headers(JsonNode h, boolean hasBody, boolean request) {
         StringBuilder sb = new StringBuilder();
         boolean ct = false;
         if (h != null && h.isObject()) {
             for (Map.Entry<String, JsonNode> e : h.properties()) {
-                if (e.getKey().equalsIgnoreCase("content-type")) ct = true;
+                if (e.getKey().equalsIgnoreCase("content-type")) {
+                    if (request) continue;
+                    ct = true;
+                }
                 if (!sb.isEmpty()) sb.append(", ");
                 sb.append(str(e.getKey())).append(", ").append(str(e.getValue().asText()));
             }
         }
         if (hasBody && !ct) {
             if (!sb.isEmpty()) sb.append(", ");
-            sb.append("\"Content-Type\", \"application/json\"");
+            sb.append("\"Content-Type\", ").append(str(request ? JSON_UTF8 : "application/json"));
         }
         return sb.isEmpty() ? null : "Map.of(" + sb + ")";
     }

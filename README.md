@@ -3,7 +3,7 @@
 Herramienta de código abierto que genera **pruebas de contrato Pact V4** (consumidor, JUnit 5 + Pact JVM) para microservicios Spring Boot a partir de **especificaciones OpenAPI 3.x** mediante LLMs. El modelo, sus parámetros y el prompt quedan fijados y archivados, de modo que cada ejecución es reproducible.
 
 > Trabajo Fin de Máster — Máster Universitario en Ingeniería de Software y Sistemas Informáticos (UNIR).
-> **Estado (20 nov 2026):** versión 1.6, piloto sobre el corpus completo (20/20 operaciones, 60/60 pruebas en verde) y arnés de verificación de proveedor para los cinco proveedores (línea base de P1: 22/22 y de P4: 9/9 interacciones). Pendiente: línea base a ciegas de P2, P3 y P5, mutantes y experimento.
+> **Estado (20 nov 2026):** versión 1.7, piloto sobre el corpus completo (20/20 operaciones, 60/60 pruebas en verde) y verificación de proveedor operativa para customers-service. Pendiente: verificación de P2–P5, mutantes y experimento.
 
 ## Cómo funciona
 
@@ -101,11 +101,10 @@ Los documentos OpenAPI (`validation/microservices/`) se redactaron a partir de l
 
 ## Verificación contra los proveedores
 
-`validation/provider-verification/` verifica los contratos contra el código real de cada proveedor, a nivel de controlador (`@WebMvcTest` + Pact JVM `junit5spring`), con los repositorios simulados mediante datos derivados de cada contrato. piggymetrics (P3–P5, Spring Boot 2.0) se verifica sobre un portado fiel de sus controladores a Spring Boot 3.4.1 (`validation/provider-verification/piggymetrics/`, ver su `NOTICE`). Sirve para validar el corpus antes del experimento (línea base) y para medir la detección de cambios incompatibles (mutantes). Ver su README.
+`validation/provider-verification/` verifica los contratos contra el código real de cada proveedor, a nivel de controlador (`@WebMvcTest` + Pact JVM `junit5spring`), con los repositorios simulados mediante datos derivados de cada contrato. Sirve para validar el corpus antes del experimento (línea base) y para medir la detección de cambios incompatibles (mutantes). Ver su README.
 
 ```powershell
 .\validation\provider-verification\verificar.ps1 -Proveedor P1 -Pacts examples\spike-consumer\target\pacts
-.\validation\provider-verification\verificar.ps1 -Proveedor P3 -Pacts <carpeta temporal> -Ciego   # grupo A: solo totales
 ```
 
 La línea base de customers-service reveló una inconsistencia del propio petclinic (`POST /owners/{id}/pets` serializa `birthDate` con fecha y hora; las lecturas, solo con fecha) y motivó las versiones 1.4 y 1.5.
@@ -127,6 +126,7 @@ La línea base de customers-service reveló una inconsistencia del propio petcli
 | 1.4 | 18 nov | **Reglas de coincidencia guiadas por el esquema**: `date` → fecha; otro `string` → texto; `integer` → entero; `number` → número | El tipo del contrato dependía del valor de ejemplo del modelo |
 | 1.5 | 18 nov | **Causa de cada código** en el contexto (descripción de la respuesta) | El modelo usó el 400 de `createPet` para una causa no declarada |
 | 1.6 | 20 nov | Regla ISO 8601 para `date-time`; se conservan las cabeceras exigidas por `securitySchemes`; versiones del entorno y modelo declarado por la API en el manifiesto; opción `--no-filters` | Revisión externa del diseño (18 nov) |
+| 1.7 | 20 nov | Las peticiones con cuerpo declaran `Content-Type: application/json; charset=UTF-8` | Línea base de visits-service: un cuerpo exacto con tildes no coincidía porque el servidor simulado de Pact lo decodificaba como ISO-8859-1 |
 
 Las respuestas archivadas permiten reprocesar ejecuciones anteriores con una versión nueva sin coste (`--replay`).
 
@@ -146,7 +146,7 @@ runs/                              bitácora de ejecuciones de desarrollo
 
 ## Pendiente
 
-- Línea base a ciegas de P2, P3 y P5 (contratos generados en carpeta temporal)
+- Verificación de proveedor de P2 (visits-service) y de P3–P5 (piggymetrics, Spring Boot 2.0)
 - Mutantes: 25 cambios incompatibles (BC1–BC5) y 10 compatibles (NB1–NB2)
 - Congelar la herramienta para el experimento (etiqueta `experimento-v1`)
 - `validate` y `diff` en la CLI; publicación en Pact Broker (RF-10); probar el plugin Maven
