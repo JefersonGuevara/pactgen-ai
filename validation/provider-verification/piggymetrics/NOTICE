@@ -1,0 +1,108 @@
+PactGen-AI — verificación de proveedor de piggymetrics (P3 account-service, P4 statistics-service, P5 auth-service)
+================================================================================================================
+
+Este directorio contiene una adaptación parcial de piggymetrics:
+
+  Proyecto:  piggymetrics — https://github.com/sqshq/piggymetrics
+  Commit:    6bb2cf9 (15 nov 2021), Spring Boot 2.0.3, Java 8
+  Licencia:  MIT (texto completo al final de este archivo)
+
+Motivo: Pact JVM 4.6 (junit5spring) exige Java 17 y Spring 6, y piggymetrics usa Spring Boot 2.0 / Java 8. En lugar
+de verificar el binario original, se porta a Spring Boot 3.4.1 solo lo que un contrato verifica: rutas, códigos de
+estado, validación y serialización JSON. Amenaza a la validez: se verifica una adaptación fiel de los controladores,
+no el binario original.
+
+
+1. Qué se portó (src/main/java; se regenera con portar.ps1)
+-----------------------------------------------------------
+
+Paquetes, nombres de clase, rutas, anotaciones de validación y manejo de errores se conservan tal cual. Cada archivo
+empieza con un comentario que indica su origen.
+
+  account-service     controller/AccountController, controller/ErrorHandler,
+                      domain/{Account, Currency, Item, Saving, TimePeriod, User}, service/AccountService
+  statistics-service  controller/StatisticsController,
+                      domain/{Account, Currency, ExchangeRatesContainer, Item, Saving, TimePeriod},
+                      domain/timeseries/{DataPoint, DataPointId, ItemMetric, StatisticMetric},
+                      service/StatisticsService
+  auth-service        controller/UserController, domain/User, service/UserService
+
+No se portan las implementaciones de los servicios, los repositorios, los clientes Feign ni la configuración: las
+interfaces de servicio se simulan con Mockito en cada prueba.
+
+
+2. Adaptaciones del código portado (las únicas diferencias con el original; ver portar.ps1)
+------------------------------------------------------------------------------------------
+
+  a) javax.validation.*  ->  jakarta.validation.*  (Jakarta EE 9+). org.hibernate.validator.constraints.Length
+     se mantiene (Hibernate Validator 8).
+  b) Se quitan @PreAuthorize y su import (OAuth2 / seguridad de métodos). La autenticación no forma parte del
+     contrato (ver la descripción de cada OpenAPI).
+  c) Se quitan @Document y @Id de Spring Data MongoDB y sus imports: no afectan al JSON.
+  d) Se quita @JsonIgnoreProperties(ignoreUnknown = true) de org.codehaus.jackson (Jackson 1) en los dos
+     domain/Account: Jackson 2 ignora esa anotación, así que en el original tampoco tenía efecto. Spring Boot ignora
+     igualmente las propiedades desconocidas (FAIL_ON_UNKNOWN_PROPERTIES = false en 2.0 y en 3.4).
+
+
+3. Comportamiento de Spring Boot 2.0 que reproduce el arnés (src/test/java/dev/pactgen/verification/Boot20.java)
+---------------------------------------------------------------------------------------------------------------
+
+  - Context paths de config/src/main/resources/shared/*.yml: /accounts, /statistics y /uaa (MockMvc con
+    defaultRequest(get("/").contextPath(...))).
+  - Fechas como Jackson 2.9: StdDateFormat().withColonInTimeZone(false) -> 2026-11-18T15:30:00.000+0000.
+  - Barra final opcional en las rutas (Spring 5.0 la aceptaba; en Spring 6 se activa con setUseTrailingSlashMatch).
+  - Página de error del contenedor: MockMvc no despacha a /error. Un sendError (fallo de @Valid, cuerpo ilegible) o
+    una excepción no manejada (-> 500, el caso de usuario duplicado en auth-service) reciben el cuerpo JSON de
+    BasicErrorController (timestamp, status, error, message, path y, en validación, errors), como en Boot 2.0, que
+    incluía siempre message y errors. Un setStatus sin cuerpo (ErrorHandler de account-service: 400 vacío) se
+    deja tal cual, como en Tomcat.
+  - El Principal que pondría OAuth2 se inyecta en la petición. Para GET /uaa/users/current, un
+    UsernamePasswordAuthenticationToken autenticado (por defecto con ROLE_USER) con el nombre y las autoridades del
+    contrato; serializa name, authenticated, authorities, principal, credentials y details. En producción es un
+    OAuth2Authentication, con más campos (el OpenAPI solo describe los estables).
+  - Las clases *VerificationApplication de src/test sustituyen a las *Application originales, cuyas anotaciones
+    (Eureka, Feign, OAuth2, seguridad de métodos) no afectan al contrato.
+
+Diferencias conocidas que no se reproducen: Spring 5.0 respondía application/json;charset=UTF-8 (Spring 6:
+application/json) y admitía sufijos de ruta (/accounts/demo.json). Los mensajes de error de Bean Validation y los
+campos de "errors" pueden diferir en detalle entre Hibernate Validator 6 y 8.
+
+
+4. Datos de prueba
+------------------
+
+Los servicios simulados devuelven entidades construidas desde la respuesta esperada del contrato
+(../common/ContractFixtures.java, el mismo archivo que usan P1 y P2, añadido como fuente de prueba con
+build-helper-maven-plugin). Los errores que dependen de los datos del servicio se simulan solo cuando el contrato
+espera ese código y su estado lo describe:
+  - POST /accounts/ -> 400 si la cuenta ya existe (Assert.isNull en AccountServiceImpl.create)
+  - PUT /accounts/current -> 400 si la cuenta no existe (Assert.notNull en AccountServiceImpl.saveChanges)
+  - POST /uaa/users -> 500 si el usuario ya existe (IllegalArgumentException sin manejador en UserServiceImpl.create)
+Los 400 por datos inválidos los produce la validación real (@Valid), no el simulador.
+
+
+------------------------------------------------------------------------------------------------------------------
+Licencia de piggymetrics
+------------------------------------------------------------------------------------------------------------------
+
+The MIT License (MIT)
+
+Copyright (c) 2016 Alexander Lukyanchikov, http://sqshq.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

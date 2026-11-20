@@ -45,10 +45,20 @@ public final class ContractFixtures {
 
     private ContractFixtures() {}
 
-    /** Lo que el contrato espera en una interacción HTTP. */
-    public record Expected(String method, String path, int status, JsonNode requestBody, JsonNode responseBody) {
+    /**
+     * Lo que el contrato espera en una interacción HTTP.
+     *
+     * @param state estados del proveedor y descripción de la interacción, en el lenguaje natural del contrato;
+     *              solo para distinguir errores que dependen de los datos del servicio (p. ej., «la cuenta no existe»)
+     */
+    public record Expected(String method, String path, int status, JsonNode requestBody, JsonNode responseBody,
+                           String state) {
         public boolean ok() { return status < 400; }
         public boolean is(String m, String pathRegex) { return method.equalsIgnoreCase(m) && path.matches(pathRegex); }
+        public boolean stateMatches(String regex) {
+            return java.util.regex.Pattern.compile(regex, java.util.regex.Pattern.CASE_INSENSITIVE
+                    | java.util.regex.Pattern.UNICODE_CASE).matcher(state).find();
+        }
     }
 
     public static Expected expected(Interaction interaction) {
@@ -56,8 +66,11 @@ public final class ContractFixtures {
         if (rr == null) throw new IllegalStateException("Solo se verifican interacciones HTTP síncronas");
         IRequest req = rr.getRequest();
         IResponse res = rr.getResponse();
+        StringBuilder state = new StringBuilder();
+        interaction.getProviderStates().forEach(s -> state.append(s.getName()).append(" | "));
+        state.append(interaction.getDescription());
         return new Expected(req.getMethod().toUpperCase(), req.getPath(), res.getStatus(),
-                json(req.getBody()), json(res.getBody()));
+                json(req.getBody()), json(res.getBody()), state.toString());
     }
 
     private static JsonNode json(OptionalBody body) {
@@ -215,14 +228,45 @@ public final class ContractFixtures {
         }
     }
 
+    /**
+     * Instancia con el constructor vacío o, si no lo hay (p. ej., {@code DataPointId(String, Date)} de piggymetrics),
+     * con el constructor de menos parámetros y valores neutros; los campos se asignan después por reflexión.
+     */
     private static Object instantiate(Class<?> c) {
         try {
             Constructor<?> k = c.getDeclaredConstructor();
             k.setAccessible(true);
             return k.newInstance();
+        } catch (NoSuchMethodException e) {
+            Constructor<?> best = null;
+            for (Constructor<?> k : c.getDeclaredConstructors()) {
+                if (best == null || k.getParameterCount() < best.getParameterCount()) best = k;
+            }
+            if (best == null) throw new IllegalStateException("Sin constructores: " + c.getName(), e);
+            Object[] args = new Object[best.getParameterCount()];
+            Class<?>[] types = best.getParameterTypes();
+            for (int i = 0; i < args.length; i++) args[i] = neutral(types[i]);
+            try {
+                best.setAccessible(true);
+                return best.newInstance(args);
+            } catch (Exception ex) {
+                throw new IllegalStateException("No se pudo instanciar " + c.getName(), ex);
+            }
         } catch (Exception e) {
-            throw new IllegalStateException("Sin constructor vacío: " + c.getName(), e);
+            throw new IllegalStateException("No se pudo instanciar " + c.getName(), e);
         }
+    }
+
+    private static Object neutral(Class<?> t) {
+        if (!t.isPrimitive()) return null;
+        if (t == boolean.class) return false;
+        if (t == char.class) return '\0';
+        if (t == long.class) return 0L;
+        if (t == double.class) return 0d;
+        if (t == float.class) return 0f;
+        if (t == short.class) return (short) 0;
+        if (t == byte.class) return (byte) 0;
+        return 0;
     }
 
     private static List<Field> fields(Class<?> c) {
