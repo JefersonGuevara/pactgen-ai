@@ -33,6 +33,18 @@ Un **bloque** es un proveedor en una condición (manual o PactGen-AI). Duración
 
 **Ejecuciones 2 y 3** (variabilidad del modelo): al terminar la sesión, sin cronometrar ni revisar, ejecuta `preparar.ps1` con `-Ejecucion 2` y `-Ejecucion 3`, lanza `generate` y `mvn test`, y registra solo las métricas automáticas (`ejecucion` = 2 o 3; columnas de tiempo vacías).
 
+## Convención de redacción de los estados del proveedor (ambas condiciones)
+
+El arnés de verificación de piggymetrics simula los errores que dependen del servicio (cuenta inexistente, usuario duplicado…) a partir del texto del `providerState`. Para que la verificación no dependa de la redacción, en la condición manual escribe los estados con estas expresiones (en español o en inglés):
+
+| Situación | Expresiones |
+|---|---|
+| El recurso no existe | «no existe», «inexistente», «not found», «does not exist» |
+| El recurso ya existe | «ya existe», «duplicado», «already exists» |
+| Caso normal | cualquier otra redacción, p. ej. «existe la cuenta demo» |
+
+La convención se fijó antes de la sesión 1 y coincide con la que reconoce el arnés para los contratos generados. Si en un bloque se usa otra redacción, se anota en `observaciones` y la interacción se verifica tal cual, sin reescribir el estado.
+
 ## Reglas que no se rompen
 
 - Nada de la herramienta cambia entre la sesión 1 y la 2: ni el código, ni el prompt (v1.1), ni el filtro (activo), ni el modelo (`claude-haiku-4-5-20251001`, temperatura 0,2).

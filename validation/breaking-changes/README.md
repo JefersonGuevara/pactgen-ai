@@ -113,4 +113,4 @@ Ninguno de los 35 mutantes se apartó de la lista prerregistrada. Las implementa
 |---|---|---|---|
 | P3 account-service | 12 (12 verificadas) | 5/5 | 0/2 |
 | P5 auth-service | 5 (5 verificadas) | 5/5 | 0/2 |
-| P2 visits-service | pendiente: no hay contratos generados de P2 | — | — |
+| P2 visits-service | 9 (9 verificadas) | 5/5 | 0/2 |

@@ -55,6 +55,6 @@ Sin contratos en `piggymetrics/target/pacts-to-verify`, `mvn -f validation\provi
 | P4 statistics-service | 20 nov | piloto (3 operaciones, *replay*, herramienta v1.6) | 9/9 interacciones verificadas |
 | P3 account-service | 20 nov | generados en carpeta temporal (4 operaciones, herramienta v1.7); a ciegas | 12/12 interacciones verificadas |
 | P5 auth-service | 20 nov | generados en carpeta temporal (2 operaciones, herramienta v1.7); a ciegas | 5/5 interacciones verificadas |
-| P2 visits-service | — | pendiente | a ciegas (`-Ciego`) |
+| P2 visits-service | 21 nov | generados en carpeta temporal (3 operaciones, herramienta v1.7); a ciegas | 9/9 interacciones verificadas |
 
 En la primera pasada a ciegas, P3 dio 11/12 y P5 4/5. Los dos fallos eran del arnés y se corrigieron en él, sin tocar los contratos: (1) un valor de ejemplo fuera de un enum quedaba como `null` en los datos de prueba (corregido en `ContractFixtures`); (2) el simulador de `UserService` no reproducía las precondiciones de `UserServiceImpl.create`, que responden 500 si falta `username` o `password` (corregido en `AuthContractVerificationTest`). Tras la corrección, P1 (22/22) y P4 (9/9) siguen verificándose.

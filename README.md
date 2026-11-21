@@ -3,7 +3,7 @@
 Herramienta de código abierto que genera **pruebas de contrato Pact V4** (consumidor, JUnit 5 + Pact JVM) para microservicios Spring Boot a partir de **especificaciones OpenAPI 3.x** mediante LLMs. El modelo, sus parámetros y el prompt quedan fijados y archivados, de modo que cada ejecución es reproducible.
 
 > Trabajo Fin de Máster — Máster Universitario en Ingeniería de Software y Sistemas Informáticos (UNIR).
-> **Estado (20 nov 2026):** versión 1.7, piloto sobre el corpus completo (20/20 operaciones, 60/60 pruebas en verde) y verificación de proveedor para los cinco proveedores (línea base: P1 22/22, P3 12/12 a ciegas, P4 9/9 y P5 5/5 a ciegas). Pendiente: línea base a ciegas de P2, mutantes y experimento.
+> **Estado (20 nov 2026):** versión 1.7, piloto sobre el corpus completo (20/20 operaciones, 60/60 pruebas en verde) y verificación de proveedor para los cinco proveedores (línea base: P1 22/22, P2 9/9, P3 12/12, P4 9/9 y P5 5/5; P2, P3 y P5 a ciegas) y 35 mutantes (25/25 incompatibles detectados, 0/10 falsos positivos). Pendiente: congelar la herramienta y experimento.
 
 ## Cómo funciona
 
@@ -147,7 +147,6 @@ runs/                              bitácora de ejecuciones de desarrollo
 
 ## Pendiente
 
-- Línea base a ciegas de P2 (contratos generados en carpeta temporal)
 - Mutantes: 25 cambios incompatibles (BC1–BC5) y 10 compatibles (NB1–NB2)
 - Congelar la herramienta para el experimento (etiqueta `experimento-v1`)
 - `validate` y `diff` en la CLI; publicación en Pact Broker (RF-10); probar el plugin Maven
