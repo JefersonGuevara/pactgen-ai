@@ -13,6 +13,7 @@ import com.piggymetrics.auth.service.UserService;
 import dev.pactgen.verification.Boot20;
 import dev.pactgen.verification.ContractFixtures;
 import dev.pactgen.verification.ContractFixtures.Expected;
+import dev.pactgen.verification.ProviderStates;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -48,8 +49,8 @@ import static org.mockito.BDDMockito.willThrow;
 @IgnoreNoPactsToVerify // sin contratos de este proveedor en la carpeta, la clase se omite (mvn test sin fallos)
 class AuthContractVerificationTest {
 
-    /** Estado del contrato que corresponde a la IllegalArgumentException de UserServiceImpl.create (→ 500). */
-    static final String ALREADY_EXISTS = "ya existe|\\bexistente|duplicad|already exist|ya est[aá] registrad|en uso";
+    /** Estados que el arnés reconoce: ver ProviderStates (convención de PROTOCOLO_SESION.md). */
+    static final String ALREADY_EXISTS = ProviderStates.ALREADY_EXISTS;
 
     @Autowired
     WebApplicationContext ctx;

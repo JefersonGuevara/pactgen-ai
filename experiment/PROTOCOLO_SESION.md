@@ -39,9 +39,13 @@ El arnés de verificación de piggymetrics simula los errores que dependen del s
 
 | Situación | Expresiones |
 |---|---|
-| El recurso no existe | «no existe», «inexistente», «not found», «does not exist» |
-| El recurso ya existe | «ya existe», «duplicado», «already exists» |
+| El recurso no existe | «no existe», «inexistente», «not found», «does not exist», «no encontrado», «no está registrado», «sin cuenta» |
+| El recurso ya existe | «ya existe», «duplicado», «already exists», «existente», «ya está registrado», «en uso» |
 | Caso normal | cualquier otra redacción, p. ej. «existe la cuenta demo» |
+
+En el caso normal no uses la palabra «existente», porque el arnés la lee como «ya existe». Escribe, por ejemplo, «existe la cuenta demo» en lugar de «una cuenta existente».
+
+Las expresiones se reconocen sin distinguir mayúsculas y en cualquier parte del estado, también en femenino («no encontrada», «ya está registrada»). Solo se aplican cuando el contrato espera el código de error correspondiente: 400 en account-service y 500 en auth-service. La tabla y el arnés (`validation/provider-verification/piggymetrics/.../ProviderStates.java`) se comprueban entre sí con `ProviderStatesTest`. Las tres últimas expresiones de cada fila se añadieron el 21 nov, porque el arnés ya las reconocía.
 
 La convención se fijó antes de la sesión 1 y coincide con la que reconoce el arnés para los contratos generados. Si en un bloque se usa otra redacción, se anota en `observaciones` y la interacción se verifica tal cual, sin reescribir el estado.
 

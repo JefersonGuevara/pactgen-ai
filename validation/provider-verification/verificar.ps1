@@ -47,9 +47,9 @@ if ($c.local) {
   # P3–P5: proyecto Maven propio con el portado; no hay clon ni rama
   if ($Rama) { Write-Error "-Rama no se aplica a $Proveedor (portado local de piggymetrics)"; exit 2 }
   $module = Join-Path $here $c.local
-  # El parche se aplica sobre el árbol de trabajo del repositorio: el portado debe estar limpio
-  git -C $repoRoot diff --quiet -- "$portado/src"
-  if ($LASTEXITCODE -ne 0) { Write-Error "El portado tiene cambios sin confirmar en $portado/src; confírmalos o descártalos antes de verificar"; exit 2 }
+  # Los parches de los mutantes se aplican sobre src/main del árbol de trabajo: debe estar limpio (src/test es el arnés)
+  git -C $repoRoot diff --quiet -- "$portado/src/main"
+  if ($LASTEXITCODE -ne 0) { Write-Error "El portado tiene cambios sin confirmar en $portado/src/main; confírmalos o descártalos antes de verificar"; exit 2 }
   Write-Host "Proveedor $Proveedor en el portado de piggymetrics (6bb2cf9): $module" -ForegroundColor Cyan
 } else {
   $providers = Join-Path (Resolve-Path "$here\..\..\..") 'providers'

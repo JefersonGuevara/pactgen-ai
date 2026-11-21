@@ -13,6 +13,7 @@ import com.piggymetrics.account.service.AccountService;
 import dev.pactgen.verification.Boot20;
 import dev.pactgen.verification.ContractFixtures;
 import dev.pactgen.verification.ContractFixtures.Expected;
+import dev.pactgen.verification.ProviderStates;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -44,10 +45,9 @@ import static org.mockito.BDDMockito.willThrow;
 @IgnoreNoPactsToVerify // sin contratos de este proveedor en la carpeta, la clase se omite (mvn test sin fallos)
 class AccountContractVerificationTest {
 
-    /** Estado del contrato que corresponde a Assert.isNull(existing) en AccountServiceImpl.create. */
-    static final String ALREADY_EXISTS = "ya existe|\\bexistente|duplicad|already exist|ya est[aá] registrad|en uso";
-    /** Estado que corresponde a Assert.notNull(account) en AccountServiceImpl.saveChanges. */
-    static final String NOT_FOUND = "no existe|inexistente|not exist|not found|no encontrad|no est[aá] registrad|sin cuenta";
+    /** Estados que el arnés reconoce: ver ProviderStates (convención de PROTOCOLO_SESION.md). */
+    static final String ALREADY_EXISTS = ProviderStates.ALREADY_EXISTS;
+    static final String NOT_FOUND = ProviderStates.NOT_FOUND;
 
     @Autowired
     WebApplicationContext ctx;
