@@ -1,0 +1,59 @@
+openapi: 3.0.3
+info: { title: diff, version: '1' }
+paths:
+  /owners/{ownerId}:
+    get:
+      operationId: findOwner
+      summary: Obtiene un propietario
+      parameters:
+        - { name: ownerId, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200':
+          description: Propietario encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Owner' }
+        '404': { description: No existe }
+  /owners:
+    get:
+      operationId: findAll
+      parameters:
+        - { name: city, in: query, required: false, schema: { type: string } }
+      responses:
+        '200':
+          description: Lista
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Owner' }
+    post:
+      operationId: createOwner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OwnerRequest' }
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Owner' }
+components:
+  schemas:
+    OwnerRequest:
+      type: object
+      required: [firstName, lastName]
+      properties:
+        firstName: { type: string }
+        lastName: { type: string }
+    Owner:
+      type: object
+      required: [id, firstName, lastName]
+      properties:
+        id: { type: integer }
+        firstName: { type: string }
+        lastName: { type: string }
+        status: { type: string, enum: [ACTIVE, INACTIVE] }
+        since: { type: string, format: date }

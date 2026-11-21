@@ -1,0 +1,72 @@
+openapi: 3.0.3
+info: { title: validate, version: '1' }
+paths:
+  /api/items/{id}:
+    get:
+      operationId: getItem
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+        - { name: X-Tenant, in: header, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Item' }
+        '404': { description: no existe }
+  /api/items/current:
+    get:
+      operationId: getCurrentItem
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Item' }
+  /api/items:
+    get:
+      operationId: searchItems
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Item' }
+    post:
+      operationId: createItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewItem' }
+      responses:
+        '201':
+          description: creado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Item' }
+        '400': { description: datos inválidos }
+components:
+  schemas:
+    NewItem:
+      type: object
+      required: [name, kind]
+      properties:
+        name: { type: string }
+        kind: { type: string, enum: [A, B] }
+    Item:
+      allOf:
+        - $ref: '#/components/schemas/NewItem'
+        - type: object
+          required: [id]
+          properties:
+            id: { type: integer }
+            price: { type: number }
+            active: { type: boolean }
+            day: { type: string, format: date }
+            updated: { type: string, format: date-time }
+            note: { type: string, nullable: true }

@@ -1,11 +1,17 @@
 package dev.pactgen.cli;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.pactgen.core.diff.OpenApiDiff;
 import dev.pactgen.core.engine.GenerationEngine;
 import dev.pactgen.core.llm.LlmConfig;
+import dev.pactgen.core.model.ApiModel;
+import dev.pactgen.core.openapi.OpenApiLoader;
+import dev.pactgen.core.validation.PactValidator;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
@@ -87,21 +93,88 @@ public class PactGenCli implements Runnable {
         }
     }
 
-    @Command(name = "validate", description = "Valida contratos Pact contra el esquema V4 y el OpenAPI (iteración I3).")
+    @Command(name = "validate", description = "Comprueba que contratos Pact son coherentes con el OpenAPI, sin proveedor "
+            + "en marcha. Salida: 0 sin errores, 1 con errores, 2 si no se pueden leer los archivos.")
     static class Validate implements Callable<Integer> {
+        @Option(names = "--openapi", required = true, description = "Ruta al documento OpenAPI 3.x")
+        Path openapi;
+        @Option(names = "--pact", required = true, description = "Contrato Pact (.json) o carpeta con contratos")
+        Path pact;
+        @Option(names = "--json", description = "Escribe también el informe en JSON en este archivo")
+        Path json;
+        @Option(names = "--strict", negatable = false, description = "Los avisos (campos o parámetros no declarados) "
+                + "cuentan como errores")
+        boolean strict;
+
         @Override
         public Integer call() {
-            System.err.println("validate: pendiente de implementar en la iteración I3");
-            return 3;
+            PactValidator.Report report;
+            try {
+                ApiModel api = new OpenApiLoader().load(openapi);
+                report = new PactValidator(api, strict).validate(pact);
+            } catch (OpenApiLoader.InvalidSpecException | PactValidator.UnreadablePactException e) {
+                System.err.println(e.getMessage());
+                return 2;
+            }
+            for (PactValidator.InteractionResult r : report.interactions()) {
+                String head = String.format("%-5s %s [%d] %s %s -> %s  %s", r.level(), r.file(), r.index(), r.method(),
+                        r.path(), r.status() == null ? "?" : r.status(), r.description());
+                System.out.println(head);
+                for (String reason : r.reasons()) System.out.println("        - " + reason);
+                for (String note : r.notes()) System.out.println("        nota: " + note);
+            }
+            long sinComprobar = report.interactions().stream().filter(r -> !r.notes().isEmpty()).count();
+            System.out.printf("Interacciones: %d | OK: %d | AVISO: %d | ERROR: %d | petición no comprobada (4xx/5xx): %d%n",
+                    report.interactions().size(), report.count(PactValidator.Level.OK),
+                    report.count(PactValidator.Level.AVISO), report.count(PactValidator.Level.ERROR), sinComprobar);
+            if (json != null) {
+                try {
+                    if (json.toAbsolutePath().getParent() != null) Files.createDirectories(json.toAbsolutePath().getParent());
+                    new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(json.toFile(), report);
+                } catch (java.io.IOException e) {
+                    System.err.println("No se pudo escribir " + json + ": " + e.getMessage());
+                    return 2;
+                }
+            }
+            return report.hasErrors() ? 1 : 0;
         }
     }
 
-    @Command(name = "diff", description = "Compara dos versiones de un OpenAPI y señala contratos afectados (iteración I3).")
+    @Command(name = "diff", description = "Compara dos versiones de un OpenAPI y clasifica los cambios para el consumidor. "
+            + "Salida: 0 sin incompatibles, 1 con alguno, 2 si hay errores de lectura.")
     static class Diff implements Callable<Integer> {
+        @Option(names = "--old", required = true, description = "Versión anterior del OpenAPI")
+        Path oldSpec;
+        @Option(names = "--new", required = true, description = "Versión nueva del OpenAPI")
+        Path newSpec;
+        @Option(names = "--json", description = "Escribe también el informe en JSON en este archivo")
+        Path json;
+
         @Override
         public Integer call() {
-            System.err.println("diff: pendiente de implementar en la iteración I3");
-            return 3;
+            OpenApiDiff.Report report;
+            try {
+                OpenApiLoader loader = new OpenApiLoader();
+                report = new OpenApiDiff().compare(loader.load(oldSpec), loader.load(newSpec));
+            } catch (OpenApiLoader.InvalidSpecException e) {
+                System.err.println(e.getMessage());
+                return 2;
+            }
+            for (OpenApiDiff.Change c : report.changes()) {
+                System.out.printf("%-12s %s: %s%n", c.kind(), c.operation(), c.message());
+            }
+            System.out.printf("Cambios: %d | incompatibles: %d | compatibles: %d%n", report.changes().size(),
+                    report.count(OpenApiDiff.Kind.INCOMPATIBLE), report.count(OpenApiDiff.Kind.COMPATIBLE));
+            if (json != null) {
+                try {
+                    if (json.toAbsolutePath().getParent() != null) Files.createDirectories(json.toAbsolutePath().getParent());
+                    new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(json.toFile(), report);
+                } catch (java.io.IOException e) {
+                    System.err.println("No se pudo escribir " + json + ": " + e.getMessage());
+                    return 2;
+                }
+            }
+            return report.hasBreaking() ? 1 : 0;
         }
     }
 }

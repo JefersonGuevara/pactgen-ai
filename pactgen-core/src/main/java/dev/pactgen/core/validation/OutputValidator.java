@@ -92,8 +92,8 @@ public final class OutputValidator {
         }
     }
 
-    /** "/owners/{ownerId}" → ^/owners/[^/]+$ */
-    static Pattern templateToRegex(String template) {
+    /** "/owners/{ownerId}" → ^/owners/[^/]+$ (también lo usa {@link PactValidator}). */
+    public static Pattern templateToRegex(String template) {
         StringBuilder sb = new StringBuilder("^");
         for (String part : template.split("(?=\\{)|(?<=\\})")) {
             if (part.startsWith("{") && part.endsWith("}")) sb.append("[^/]+");

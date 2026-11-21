@@ -65,6 +65,60 @@ Cada ejecución deja en `<out>/pactgen/` el **manifiesto** (modelo, temperatura,
 
 **Proyecto consumidor.** Pact JVM 4.6.17 arrastra `junit-jupiter-api` 5.9.2, incompatible con los motores JUnit 5.10 o superiores. El `pom.xml` del consumidor debe importar `junit-bom` y declarar `junit-jupiter-api` y `junit-platform-commons` de forma explícita (ver `examples/spike-consumer/pom.xml`).
 
+### `pactgen validate`: contrato frente al OpenAPI
+
+```bash
+java -jar pactgen-cli/target/pactgen.jar validate \
+  --openapi validation/microservices/customers-service/openapi.yaml \
+  --pact examples/spike-consumer/target/pacts            # un .json o una carpeta
+```
+
+| Opción | Descripción |
+|---|---|
+| `--openapi` | Documento OpenAPI 3.x |
+| `--pact` | Contrato Pact (V4; también V3) o carpeta con contratos `*.json` |
+| `--json <archivo>` | Escribe además el informe en JSON |
+| `--strict` | Los avisos (campos o parámetros no declarados) cuentan como errores |
+
+Comprueba, sin proveedor en marcha y por cada interacción HTTP:
+- que el método y la ruta existen (las plantillas `{id}` se emparejan con valores concretos, y gana la más concreta);
+- que el código de estado está declarado;
+- que están los parámetros de consulta y las cabeceras obligatorios;
+- que los cuerpos cumplen el esquema: campos obligatorios, tipos, `enum`, formatos `date` y `date-time` (acepta `Z`, `+00:00` y `+0000`), y `allOf`, `oneOf` y `anyOf`.
+
+Los campos y los parámetros de consulta no declarados son avisos, y errores con `--strict`. Un `null` en un campo opcional no *nullable* es aviso, y en uno obligatorio, error.
+
+La salida tiene una línea por interacción (`OK`, `AVISO` o `ERROR`, con los motivos debajo) y un total. El código de salida es 0 sin errores, 1 con errores y 2 si no se pueden leer los archivos.
+
+**Qué no comprueba:**
+- longitudes (`minLength`, `maxLength`, `minItems`, `maxItems`);
+- patrones (`pattern`) y formatos distintos de `date` y `date-time` (`email`, `uuid`…);
+- rangos numéricos (`minimum`, `maximum`, `multipleOf`);
+- unicidad (`uniqueItems`);
+- las reglas de coincidencia del contrato (solo valida los valores de ejemplo);
+- la seguridad.
+
+**Cuerpo de la petición en las respuestas de error**: solo se compara con el esquema cuando la respuesta esperada es de éxito (< 400). En una interacción como «alta sin `firstName` → 400», la petición inválida es lo que el contrato quiere comprobar. Esas interacciones llevan la nota «cuerpo de la petición no comprobado», y el total las cuenta aparte.
+
+### `pactgen diff`: dos versiones de un OpenAPI
+
+```bash
+java -jar pactgen-cli/target/pactgen.jar diff --old openapi-v1.yaml --new openapi-v2.yaml [--json informe.json]
+```
+
+| Para el consumidor | Cambios |
+|---|---|
+| **Incompatibles** | operación eliminada o movida (misma `operationId` en otra ruta o método); código de éxito cambiado; campo de respuesta eliminado (o respuesta sin cuerpo); tipo o formato de un campo cambiado; campo obligatorio nuevo en la petición (o campo que pasa a obligatorio); parámetro nuevo obligatorio o que pasa a obligatorio; valor de `enum` eliminado en una respuesta |
+| **Compatibles** | operación nueva; campo de respuesta nuevo; campo opcional nuevo en la petición; parámetro opcional nuevo; cambios de descripción |
+
+Las operaciones se emparejan por método y ruta, y el nombre de las variables de ruta no cuenta: `/owners/{id}` es la misma que `/owners/{ownerId}`.
+
+No se informa de cambios en longitudes, patrones, rangos, ejemplos ni códigos de error.
+
+El código de salida es 0 sin incompatibles, 1 con alguno y 2 si no se puede leer un OpenAPI.
+
+Las pruebas de `OpenApiDiffTest` reproducen con OpenAPI sintéticos los cinco tipos BC y los dos NB de la Tabla 8. La lista prerregistrada de mutantes no se reclasifica con `diff`.
+
 ### Plugin Maven (en el `pom.xml` del consumidor)
 
 ```xml
