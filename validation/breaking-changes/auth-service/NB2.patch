@@ -1,0 +1,27 @@
+diff --git a/src/main/java/com/piggymetrics/auth/controller/UserController.java b/src/main/java/com/piggymetrics/auth/controller/UserController.java
+index 335721a..b5bf66b 100644
+--- a/src/main/java/com/piggymetrics/auth/controller/UserController.java
++++ b/src/main/java/com/piggymetrics/auth/controller/UserController.java
+@@ -24,6 +24,11 @@ public class UserController {
+ 		return principal;
+ 	}
+ 
++	@RequestMapping(value = "/count", method = RequestMethod.GET)
++	public long countUsers() {
++		return userService.count();
++	}
++
+ 	@RequestMapping(method = RequestMethod.POST)
+ 	public void createUser(@Valid @RequestBody User user) {
+ 		userService.create(user);
+diff --git a/src/main/java/com/piggymetrics/auth/service/UserService.java b/src/main/java/com/piggymetrics/auth/service/UserService.java
+index 17f30ee..a0b851e 100644
+--- a/src/main/java/com/piggymetrics/auth/service/UserService.java
++++ b/src/main/java/com/piggymetrics/auth/service/UserService.java
+@@ -7,4 +7,6 @@ public interface UserService {
+ 
+ 	void create(User user);
+ 
++	long count();
++
+ }

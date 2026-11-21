@@ -22,6 +22,8 @@ Sirve para medir BC_recall y FP_rate (memoria, secciones 3.4.4 y 3.4.6): un cont
 
 Si la carpeta no contiene contratos del proveedor indicado, el script lo dice y termina con código 2.
 
+`-Parche <archivo>` aplica un mutante de `validation/breaking-changes/` solo durante la verificación y lo revierte siempre; `-Resultado <csv>` escribe el resultado por interacción (`indice,ok`, en el orden del contrato). Los usa `validation/breaking-changes/mutar.ps1`. `-Rama` queda para mutantes en ramas del clon (P1 y P2), aunque los mutantes del experimento son parches.
+
 **Modo a ciegas** (`-Ciego`): para los proveedores del grupo A (P2, P3, P5), cuyas pruebas generadas el autor no debe ver antes del experimento, la salida de Maven se guarda en `target/verificacion.log` del proveedor (en P3–P5, `piggymetrics/target/verificacion.log`) y en pantalla solo aparecen los totales. Si hay fallos, el registro lo revisa un tercero, y solo se corrige el OpenAPI o el arnés, nunca las pruebas.
 
 ## Estado

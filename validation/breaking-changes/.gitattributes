@@ -1,0 +1,2 @@
+# Los parches se aplican con git apply: siempre con LF, aunque core.autocrlf = true
+*.patch text eol=lf

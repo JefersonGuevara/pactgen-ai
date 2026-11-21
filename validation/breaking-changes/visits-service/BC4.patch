@@ -1,0 +1,25 @@
+diff --git a/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java b/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java
+index ef0fa1a..c146f25 100644
+--- a/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java
++++ b/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java
+@@ -16,6 +16,8 @@
+ package org.springframework.samples.petclinic.visits.model;
+ 
+ import com.fasterxml.jackson.annotation.JsonFormat;
++import com.fasterxml.jackson.annotation.JsonProperty;
++import jakarta.validation.constraints.NotNull;
+ import jakarta.persistence.*;
+ import jakarta.validation.constraints.Size;
+ 
+@@ -48,6 +50,11 @@ public class Visit {
+     @Column(name = "pet_id")
+     private int petId;
+ 
++    @Transient
++    @NotNull
++    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
++    private String vet;
++
+     public Integer getId() {
+         return this.id;
+     }

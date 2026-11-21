@@ -1,0 +1,111 @@
+{
+  "consumer": {
+    "name": "referencia"
+  },
+  "provider": {
+    "name": "auth-service"
+  },
+  "interactions": [
+    {
+      "type": "Synchronous/HTTP",
+      "key": "GET /uaa/users/current: principal autenticado",
+      "description": "GET /uaa/users/current: principal autenticado",
+      "providerStates": [
+        {
+          "name": "el usuario ana está autenticado"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/uaa/users/current"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "name": "ana",
+            "authenticated": true,
+            "authorities": [
+              {
+                "authority": "ROLE_USER"
+              }
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "matchingRules": {
+          "body": {
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.authenticated": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.authorities[*].authority": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Synchronous/HTTP",
+      "key": "POST /uaa/users: alta válida",
+      "description": "POST /uaa/users: alta válida",
+      "providerStates": [
+        {
+          "name": "no existe el usuario ana"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/uaa/users",
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "username": "ana",
+            "password": "secreto123"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        }
+      },
+      "response": {
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    },
+    "pactgen": {
+      "origen": "referencia (OpenAPI)"
+    }
+  }
+}

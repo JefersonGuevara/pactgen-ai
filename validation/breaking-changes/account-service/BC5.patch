@@ -1,0 +1,13 @@
+diff --git a/src/main/java/com/piggymetrics/account/controller/AccountController.java b/src/main/java/com/piggymetrics/account/controller/AccountController.java
+index b940adb..c035fa7 100644
+--- a/src/main/java/com/piggymetrics/account/controller/AccountController.java
++++ b/src/main/java/com/piggymetrics/account/controller/AccountController.java
+@@ -16,7 +16,7 @@ public class AccountController {
+ 	@Autowired
+ 	private AccountService accountService;
+ 
+-	@RequestMapping(path = "/{name}", method = RequestMethod.GET)
++	@RequestMapping(path = "/by-name/{name}", method = RequestMethod.GET)
+ 	public Account getAccountByName(@PathVariable String name) {
+ 		return accountService.findByName(name);
+ 	}

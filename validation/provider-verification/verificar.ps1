@@ -3,12 +3,14 @@
   Verifica contratos Pact contra un proveedor del corpus (línea base o mutante).
 .EXAMPLE
   .\validation\provider-verification\verificar.ps1 -Proveedor P1 -Pacts examples\spike-consumer\target\pacts
-  .\validation\provider-verification\verificar.ps1 -Proveedor P1 -Pacts <carpeta> -Rama bc/customers-service/BC1
+  .\validation\provider-verification\verificar.ps1 -Proveedor P1 -Pacts <carpeta> -Parche validation\breaking-changes\customers-service\BC1.patch
   .\validation\provider-verification\verificar.ps1 -Proveedor P2 -Pacts <carpeta> -Ciego
   .\validation\provider-verification\verificar.ps1 -Proveedor P4 -Pacts <carpeta>
   .\validation\provider-verification\verificar.ps1 -Proveedor P3 -Pacts <carpeta> -Ciego
   Ejecutar desde la raíz del repositorio pactgen-ai. P1 y P2 se clonan en ..\providers; P3–P5 usan el portado
   de piggymetrics de validation\provider-verification\piggymetrics (sin clonar ni cambiar de rama).
+  -Parche aplica un mutante (validation\breaking-changes) solo durante la verificación y lo revierte siempre.
+  -Resultado escribe un CSV con el resultado por interacción (indice,ok), en el orden del contrato.
 #>
 param(
   [Parameter(Mandatory)][ValidateSet('P1','P2','P3','P4','P5')][string]$Proveedor,
@@ -16,7 +18,10 @@ param(
   [string]$Rama = '',
   # A ciegas: la salida de Maven va a un archivo y en pantalla solo se ven los totales
   # (para proveedores del grupo A, cuyas pruebas generadas el autor no debe ver antes del experimento)
-  [switch]$Ciego
+  [switch]$Ciego,
+  # Mutante: parche relativo a la raíz del clon (P1, P2) o del portado de piggymetrics (P3–P5)
+  [string]$Parche = '',
+  [string]$Resultado = ''
 )
 $ErrorActionPreference = 'Stop'
 $corpus = @{
@@ -33,18 +38,25 @@ $corpus = @{
 }
 $c = $corpus[$Proveedor]
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
+$repoRoot = (Resolve-Path "$here\..\..").Path
+$portado = 'validation/provider-verification/piggymetrics'
+if ($Parche) { $Parche = (Resolve-Path $Parche).Path }
+if ($Resultado -and -not [IO.Path]::IsPathRooted($Resultado)) { $Resultado = Join-Path (Get-Location) $Resultado }
 
 if ($c.local) {
   # P3–P5: proyecto Maven propio con el portado; no hay clon ni rama
   if ($Rama) { Write-Error "-Rama no se aplica a $Proveedor (portado local de piggymetrics)"; exit 2 }
   $module = Join-Path $here $c.local
+  # El parche se aplica sobre el árbol de trabajo del repositorio: el portado debe estar limpio
+  git -C $repoRoot diff --quiet -- "$portado/src"
+  if ($LASTEXITCODE -ne 0) { Write-Error "El portado tiene cambios sin confirmar en $portado/src; confírmalos o descártalos antes de verificar"; exit 2 }
   Write-Host "Proveedor $Proveedor en el portado de piggymetrics (6bb2cf9): $module" -ForegroundColor Cyan
 } else {
   $providers = Join-Path (Resolve-Path "$here\..\..\..") 'providers'
   $clone = Join-Path $providers $c.dir
   $module = Join-Path $clone $c.module
 
-  # 1. Clon del proveedor en el commit fijado (o en la rama del mutante)
+  # 1. Clon del proveedor en el commit fijado (o en la rama indicada); --force descarta cualquier cambio previo
   if (-not (Test-Path $clone)) {
     New-Item -ItemType Directory -Force $providers | Out-Null
     git clone -q $c.repo $clone
@@ -78,37 +90,74 @@ if ($c.local) {
 }
 $pom = Join-Path $module 'pom.xml'
 
-# 3. Contratos a verificar
-$pactDir = Join-Path $module 'target\pacts-to-verify'
-Remove-Item -Recurse -Force $pactDir -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Force $pactDir | Out-Null
-Copy-Item (Join-Path $Pacts '*.json') $pactDir
-Write-Host "Contratos: $((Get-ChildItem $pactDir).Count) archivo(s)"
+# 3. Mutante (opcional): se aplica después de preparar el proveedor y se revierte siempre (finally)
+function Invoke-Parche([switch]$Revertir) {
+  $a = @('apply')
+  if ($Revertir) { $a += '-R' }
+  if ($c.local) { $a += "--directory=$portado"; $root = $repoRoot } else { $root = $clone }
+  $ErrorActionPreference = 'Continue'
+  git -C $root @a $Parche 2>&1 | ForEach-Object { Write-Host "$_" }
+  $ok = ($LASTEXITCODE -eq 0)
+  $ErrorActionPreference = 'Stop'
+  return $ok
+}
+if ($Parche) {
+  if (-not (Invoke-Parche)) { Write-Error "No se pudo aplicar el parche $Parche"; exit 2 }
+  Write-Host "Mutante aplicado: $(Split-Path -Leaf $Parche)" -ForegroundColor Magenta
+}
 
-# 4. Verificación. Maven escribe avisos en stderr (p. ej., el agente de Mockito): en PowerShell 5.1, con
-#    ErrorActionPreference = Stop, cualquier línea de stderr de un ejecutable detendría el script.
 $log = Join-Path $module 'target\verificacion.log'
 $reports = Join-Path $module 'target\surefire-reports'
-Get-ChildItem $reports -Filter "TEST-*$($c.test).xml" -ErrorAction SilentlyContinue | Remove-Item -Force
-$ErrorActionPreference = 'Continue'
-if ($Ciego) {
-  mvn -q -f $pom test "-Dtest=$($c.test)" "-Dsurefire.failIfNoSpecifiedTests=false" *> $log
-} else {
-  mvn -q -f $pom test "-Dtest=$($c.test)" "-Dsurefire.failIfNoSpecifiedTests=false" 2>&1 |
-    ForEach-Object { "$_" } | Tee-Object -FilePath $log | Out-Host
-}
-$ErrorActionPreference = 'Stop'
+$cases = @()
+$report = $null
+try {
+  # 4. Contratos a verificar
+  $pactDir = Join-Path $module 'target\pacts-to-verify'
+  Remove-Item -Recurse -Force $pactDir -ErrorAction SilentlyContinue
+  New-Item -ItemType Directory -Force $pactDir | Out-Null
+  Copy-Item (Join-Path $Pacts '*.json') $pactDir
+  Write-Host "Contratos: $((Get-ChildItem $pactDir).Count) archivo(s)"
 
-# 5. Resumen por interacción (informe de Surefire)
-$report = Get-ChildItem $reports -Filter "TEST-*$($c.test).xml" -ErrorAction SilentlyContinue | Select-Object -First 1
+  # 5. Verificación. Maven escribe avisos en stderr (p. ej., el agente de Mockito): en PowerShell 5.1, con
+  #    ErrorActionPreference = Stop, cualquier línea de stderr de un ejecutable detendría el script.
+  Get-ChildItem $reports -Filter "TEST-*$($c.test).xml" -ErrorAction SilentlyContinue | Remove-Item -Force
+  $ErrorActionPreference = 'Continue'
+  if ($Ciego) {
+    mvn -q -f $pom test "-Dtest=$($c.test)" "-Dsurefire.failIfNoSpecifiedTests=false" *> $log
+  } else {
+    mvn -q -f $pom test "-Dtest=$($c.test)" "-Dsurefire.failIfNoSpecifiedTests=false" 2>&1 |
+      ForEach-Object { "$_" } | Tee-Object -FilePath $log | Out-Host
+  }
+  $ErrorActionPreference = 'Stop'
+
+  # 6. Informe de Surefire (se lee antes de revertir el mutante)
+  $report = Get-ChildItem $reports -Filter "TEST-*$($c.test).xml" -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($report) {
+    [xml]$xml = Get-Content $report.FullName
+    $cases = @($xml.testsuite.testcase)
+  }
+} finally {
+  if ($Parche) {
+    if (Invoke-Parche -Revertir) { Write-Host "Mutante revertido" -ForegroundColor Magenta }
+    else { Write-Host "ATENCIÓN: no se pudo revertir $Parche; restaura el proveedor a mano" -ForegroundColor Red }
+  }
+}
+
+# 7. Resumen por interacción
 if (-not $report) { Write-Error "No hay informe de Surefire (¿no compila? ver $log)"; exit 2 }
-[xml]$xml = Get-Content $report.FullName
-$cases = @($xml.testsuite.testcase)
 $fail = @($cases | Where-Object { $_.failure -or $_.error })
 $skipped = @($cases | Where-Object { $_.SelectSingleNode("skipped") })
 if ($cases.Count -eq 0 -or $skipped.Count -eq $cases.Count) {
   Write-Host "Ninguna interacción verificada: no hay contratos de este proveedor en $Pacts" -ForegroundColor Yellow
   exit 2
+}
+if ($Resultado) {
+  # Cada caso se llama verify(PactVerificationContext)[n]: n es la posición de la interacción en el contrato
+  $filas = foreach ($t in $cases) {
+    $n = [int]([regex]::Match($t.name, '\[(\d+)\]$').Groups[1].Value)
+    [pscustomobject]@{ indice = $n; ok = [int](-not ($t.failure -or $t.error)) }
+  }
+  $filas | Sort-Object indice | Export-Csv -Path $Resultado -NoTypeInformation -Encoding UTF8
 }
 if ($Ciego) {
   Write-Host ("`nInteracciones: {0} | verificadas: {1} | fallidas: {2}" -f $cases.Count, ($cases.Count - $fail.Count), $fail.Count)

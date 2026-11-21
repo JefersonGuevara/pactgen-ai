@@ -1,0 +1,15 @@
+diff --git a/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java b/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java
+index 2a7adc7..294df7f 100644
+--- a/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java
++++ b/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java
+@@ -116,6 +116,10 @@ public class Owner {
+         return this.city;
+     }
+ 
++    public String getFullName() {
++        return this.firstName + " " + this.lastName;
++    }
++
+     public String getTelephone() {
+         return this.telephone;
+     }

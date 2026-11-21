@@ -1,0 +1,15 @@
+diff --git a/src/main/java/com/piggymetrics/account/domain/Account.java b/src/main/java/com/piggymetrics/account/domain/Account.java
+index 4ab90b8..66327d1 100644
+--- a/src/main/java/com/piggymetrics/account/domain/Account.java
++++ b/src/main/java/com/piggymetrics/account/domain/Account.java
+@@ -67,6 +67,10 @@ public class Account {
+ 		this.saving = saving;
+ 	}
+ 
++	public int getItemCount() {
++		return (incomes == null ? 0 : incomes.size()) + (expenses == null ? 0 : expenses.size());
++	}
++
+ 	public String getNote() {
+ 		return note;
+ 	}

@@ -1,0 +1,20 @@
+diff --git a/src/main/java/com/piggymetrics/statistics/domain/timeseries/DataPoint.java b/src/main/java/com/piggymetrics/statistics/domain/timeseries/DataPoint.java
+index a4b5e4c..8046be8 100644
+--- a/src/main/java/com/piggymetrics/statistics/domain/timeseries/DataPoint.java
++++ b/src/main/java/com/piggymetrics/statistics/domain/timeseries/DataPoint.java
+@@ -2,6 +2,7 @@
+ package com.piggymetrics.statistics.domain.timeseries;
+ 
+ import com.piggymetrics.statistics.domain.Currency;
++import com.fasterxml.jackson.annotation.JsonIgnore;
+ 
+ import java.math.BigDecimal;
+ import java.util.Map;
+@@ -21,6 +22,7 @@ public class DataPoint {
+ 
+ 	private Map<StatisticMetric, BigDecimal> statistics;
+ 
++	@JsonIgnore
+ 	private Map<Currency, BigDecimal> rates;
+ 
+ 	public DataPointId getId() {

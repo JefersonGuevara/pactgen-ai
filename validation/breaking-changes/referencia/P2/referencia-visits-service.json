@@ -1,0 +1,187 @@
+{
+  "consumer": {
+    "name": "referencia"
+  },
+  "provider": {
+    "name": "visits-service"
+  },
+  "interactions": [
+    {
+      "type": "Synchronous/HTTP",
+      "key": "GET /pets/visits: visitas de una mascota",
+      "description": "GET /pets/visits: visitas de una mascota",
+      "providerStates": [
+        {
+          "name": "la mascota 7 tiene una visita"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/pets/visits",
+        "query": {
+          "petId": [
+            "7"
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "items": [
+              {
+                "id": 1,
+                "date": "2024-01-15",
+                "description": "rabies shot",
+                "petId": 7
+              }
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "matchingRules": {
+          "body": {
+            "$.items": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.items[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].date": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.items[*].description": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.items[*].petId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Synchronous/HTTP",
+      "key": "POST /owners/{ownerId}/pets/{petId}/visits: alta válida",
+      "description": "POST /owners/{ownerId}/pets/{petId}/visits: alta válida",
+      "providerStates": [
+        {
+          "name": "existe la mascota 7"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/owners/1/pets/7/visits",
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "date": "2024-01-15",
+            "description": "rabies shot"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "id": 1,
+            "date": "2024-01-15",
+            "description": "rabies shot",
+            "petId": 7
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.date": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.description": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.petId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    },
+    "pactgen": {
+      "origen": "referencia (OpenAPI)"
+    }
+  }
+}

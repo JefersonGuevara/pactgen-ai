@@ -1,0 +1,13 @@
+diff --git a/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/web/VisitResource.java b/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/web/VisitResource.java
+index 07f42ba..51b8a19 100644
+--- a/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/web/VisitResource.java
++++ b/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/web/VisitResource.java
+@@ -69,7 +69,7 @@ class VisitResource {
+         return visitRepository.findByPetId(petId);
+     }
+ 
+-    @GetMapping("pets/visits")
++    @GetMapping("pets/visit-history")
+     public Visits read(@RequestParam("petId") List<Integer> petIds) {
+         final List<Visit> byPetIdIn = visitRepository.findByPetIdIn(petIds);
+         return new Visits(byPetIdIn);

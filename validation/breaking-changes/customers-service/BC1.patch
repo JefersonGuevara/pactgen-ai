@@ -1,0 +1,20 @@
+diff --git a/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java b/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java
+index 2a7adc7..c2321d0 100644
+--- a/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java
++++ b/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java
+@@ -16,6 +16,7 @@
+ package org.springframework.samples.petclinic.customers.model;
+ 
+ import jakarta.persistence.*;
++import com.fasterxml.jackson.annotation.JsonIgnore;
+ import jakarta.validation.constraints.Digits;
+ import jakarta.validation.constraints.NotBlank;
+ import org.springframework.beans.support.MutableSortDefinition;
+@@ -46,6 +47,7 @@ public class Owner {
+     @NotBlank
+     private String firstName;
+ 
++    @JsonIgnore
+     @Column(name = "last_name")
+     @NotBlank
+     private String lastName;

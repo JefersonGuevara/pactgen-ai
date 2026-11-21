@@ -1,0 +1,204 @@
+{
+  "consumer": {
+    "name": "referencia"
+  },
+  "provider": {
+    "name": "statistics-service"
+  },
+  "interactions": [
+    {
+      "type": "Synchronous/HTTP",
+      "key": "GET /statistics/{accountName}: serie de una cuenta",
+      "description": "GET /statistics/{accountName}: serie de una cuenta",
+      "providerStates": [
+        {
+          "name": "la cuenta ana tiene datos"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/statistics/ana"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": [
+            {
+              "id": {
+                "account": "ana",
+                "date": "2026-11-18T00:00:00.000+0000"
+              },
+              "incomes": [
+                {
+                  "title": "Salario",
+                  "amount": 98.56
+                }
+              ],
+              "expenses": [
+                {
+                  "title": "Alquiler",
+                  "amount": 39.43
+                }
+              ],
+              "statistics": {
+                "INCOMES_AMOUNT": 98.56,
+                "EXPENSES_AMOUNT": 39.43,
+                "SAVING_AMOUNT": 1500.0
+              },
+              "rates": {
+                "USD": 1,
+                "EUR": 0.92,
+                "RUB": 91.5
+              }
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].id.account": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].id.date": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:?\\d{2})"
+                }
+              ]
+            },
+            "$[*].incomes[*].title": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].incomes[*].amount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$[*].expenses[*].amount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$[*].statistics.INCOMES_AMOUNT": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$[*].rates.USD": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$[*].rates.EUR": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$[*].rates.RUB": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Synchronous/HTTP",
+      "key": "PUT /statistics/{accountName}: estado válido",
+      "description": "PUT /statistics/{accountName}: estado válido",
+      "providerStates": [
+        {
+          "name": "existe la cuenta ana"
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "path": "/statistics/ana",
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "incomes": [
+              {
+                "title": "Salario",
+                "amount": 3000.0,
+                "currency": "USD",
+                "period": "MONTH"
+              }
+            ],
+            "expenses": [],
+            "saving": {
+              "amount": 1500.0,
+              "currency": "USD",
+              "interest": 3.5,
+              "deposit": true,
+              "capitalization": false
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        }
+      },
+      "response": {
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    },
+    "pactgen": {
+      "origen": "referencia (OpenAPI)"
+    }
+  }
+}

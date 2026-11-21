@@ -1,0 +1,22 @@
+diff --git a/src/main/java/com/piggymetrics/account/domain/User.java b/src/main/java/com/piggymetrics/account/domain/User.java
+index 002f71d..24f1f3e 100644
+--- a/src/main/java/com/piggymetrics/account/domain/User.java
++++ b/src/main/java/com/piggymetrics/account/domain/User.java
+@@ -15,6 +15,17 @@ public class User {
+ 	@Length(min = 6, max = 40)
+ 	private String password;
+ 
++	@NotNull
++	private String email;
++
++	public String getEmail() {
++		return email;
++	}
++
++	public void setEmail(String email) {
++		this.email = email;
++	}
++
+ 	public String getUsername() {
+ 		return username;
+ 	}

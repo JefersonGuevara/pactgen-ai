@@ -1,0 +1,24 @@
+diff --git a/src/main/java/com/piggymetrics/account/controller/AccountController.java b/src/main/java/com/piggymetrics/account/controller/AccountController.java
+index b940adb..1ddeedc 100644
+--- a/src/main/java/com/piggymetrics/account/controller/AccountController.java
++++ b/src/main/java/com/piggymetrics/account/controller/AccountController.java
+@@ -2,6 +2,7 @@
+ package com.piggymetrics.account.controller;
+ 
+ import com.piggymetrics.account.domain.Account;
++import com.piggymetrics.account.domain.Currency;
+ import com.piggymetrics.account.domain.User;
+ import com.piggymetrics.account.service.AccountService;
+ import org.springframework.beans.factory.annotation.Autowired;
+@@ -21,6 +22,11 @@ public class AccountController {
+ 		return accountService.findByName(name);
+ 	}
+ 
++	@RequestMapping(path = "/currencies", method = RequestMethod.GET)
++	public Currency[] getCurrencies() {
++		return Currency.values();
++	}
++
+ 	@RequestMapping(path = "/current", method = RequestMethod.GET)
+ 	public Account getCurrentAccount(Principal principal) {
+ 		return accountService.findByName(principal.getName());

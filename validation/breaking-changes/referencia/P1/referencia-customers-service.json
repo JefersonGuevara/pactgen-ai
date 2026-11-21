@@ -1,0 +1,208 @@
+{
+  "consumer": {
+    "name": "referencia"
+  },
+  "provider": {
+    "name": "customers-service"
+  },
+  "interactions": [
+    {
+      "type": "Synchronous/HTTP",
+      "key": "GET /owners/{ownerId}: propietario existente",
+      "description": "GET /owners/{ownerId}: propietario existente",
+      "providerStates": [
+        {
+          "name": "existe el propietario 1"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/owners/1"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "id": 1,
+            "firstName": "George",
+            "lastName": "Franklin",
+            "address": "110 W. Liberty St.",
+            "city": "Madison",
+            "telephone": "6085551023",
+            "pets": []
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Synchronous/HTTP",
+      "key": "POST /owners: alta válida",
+      "description": "POST /owners: alta válida",
+      "providerStates": [
+        {
+          "name": "no hay propietarios"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/owners",
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "firstName": "George",
+            "lastName": "Franklin",
+            "address": "110 W. Liberty St.",
+            "city": "Madison",
+            "telephone": "6085551023"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "id": 1,
+            "firstName": "George",
+            "lastName": "Franklin",
+            "address": "110 W. Liberty St.",
+            "city": "Madison",
+            "telephone": "6085551023",
+            "pets": []
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.firstName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.lastName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.address": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.city": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.telephone": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    },
+    "pactgen": {
+      "origen": "referencia (OpenAPI)"
+    }
+  }
+}

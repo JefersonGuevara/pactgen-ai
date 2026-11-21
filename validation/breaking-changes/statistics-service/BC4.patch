@@ -1,0 +1,22 @@
+diff --git a/src/main/java/com/piggymetrics/statistics/domain/Account.java b/src/main/java/com/piggymetrics/statistics/domain/Account.java
+index b6a2de3..67fe987 100644
+--- a/src/main/java/com/piggymetrics/statistics/domain/Account.java
++++ b/src/main/java/com/piggymetrics/statistics/domain/Account.java
+@@ -20,6 +20,17 @@ public class Account {
+ 	@NotNull
+ 	private Saving saving;
+ 
++	@NotNull
++	private Boolean active;
++
++	public Boolean getActive() {
++		return active;
++	}
++
++	public void setActive(Boolean active) {
++		this.active = active;
++	}
++
+ 	public List<Item> getIncomes() {
+ 		return incomes;
+ 	}

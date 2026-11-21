@@ -1,0 +1,21 @@
+diff --git a/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java b/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java
+index 2a7adc7..833cee6 100644
+--- a/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java
++++ b/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/model/Owner.java
+@@ -16,6 +16,8 @@
+ package org.springframework.samples.petclinic.customers.model;
+ 
+ import jakarta.persistence.*;
++import com.fasterxml.jackson.databind.annotation.JsonSerialize;
++import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+ import jakarta.validation.constraints.Digits;
+ import jakarta.validation.constraints.NotBlank;
+ import org.springframework.beans.support.MutableSortDefinition;
+@@ -39,6 +41,7 @@ import java.util.*;
+ public class Owner {
+ 
+     @Id
++    @JsonSerialize(using = ToStringSerializer.class)
+     @GeneratedValue(strategy = GenerationType.IDENTITY)
+     private Integer id;
+ 

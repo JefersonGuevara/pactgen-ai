@@ -1,0 +1,31 @@
+diff --git a/src/main/java/com/piggymetrics/auth/domain/User.java b/src/main/java/com/piggymetrics/auth/domain/User.java
+index e894941..b7db6ba 100644
+--- a/src/main/java/com/piggymetrics/auth/domain/User.java
++++ b/src/main/java/com/piggymetrics/auth/domain/User.java
+@@ -4,6 +4,8 @@ package com.piggymetrics.auth.domain;
+ import org.springframework.security.core.GrantedAuthority;
+ import org.springframework.security.core.userdetails.UserDetails;
+ 
++import jakarta.validation.constraints.NotNull;
++
+ import java.util.List;
+ 
+ public class User implements UserDetails {
+@@ -12,6 +14,17 @@ public class User implements UserDetails {
+ 
+ 	private String password;
+ 
++	@NotNull
++	private String email;
++
++	public String getEmail() {
++		return email;
++	}
++
++	public void setEmail(String email) {
++		this.email = email;
++	}
++
+ 	@Override
+ 	public String getPassword() {
+ 		return password;

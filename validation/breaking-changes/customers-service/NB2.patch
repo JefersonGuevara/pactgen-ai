@@ -1,0 +1,19 @@
+diff --git a/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/web/OwnerResource.java b/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/web/OwnerResource.java
+index 5b5a531..1ca746f 100644
+--- a/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/web/OwnerResource.java
++++ b/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/web/OwnerResource.java
+@@ -69,6 +69,14 @@ class OwnerResource {
+         return ownerRepository.findById(ownerId);
+     }
+ 
++    /**
++     * Count Owners
++     */
++    @GetMapping(value = "/count")
++    public long countOwners() {
++        return ownerRepository.count();
++    }
++
+     /**
+      * Read List of Owners
+      */

@@ -1,0 +1,15 @@
+diff --git a/src/main/java/com/piggymetrics/statistics/domain/timeseries/DataPoint.java b/src/main/java/com/piggymetrics/statistics/domain/timeseries/DataPoint.java
+index a4b5e4c..eaa60d4 100644
+--- a/src/main/java/com/piggymetrics/statistics/domain/timeseries/DataPoint.java
++++ b/src/main/java/com/piggymetrics/statistics/domain/timeseries/DataPoint.java
+@@ -47,6 +47,10 @@ public class DataPoint {
+ 		this.expenses = expenses;
+ 	}
+ 
++	public int getItemCount() {
++		return (incomes == null ? 0 : incomes.size()) + (expenses == null ? 0 : expenses.size());
++	}
++
+ 	public Map<StatisticMetric, BigDecimal> getStatistics() {
+ 		return statistics;
+ 	}

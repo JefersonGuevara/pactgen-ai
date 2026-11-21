@@ -1,0 +1,8 @@
+﻿"proveedor","mutante","tipo","interacciones","base_ok","fallan_con_mutante","detectado"
+"P5","BC1","incompatible","2","2","1","true"
+"P5","BC2","incompatible","2","2","1","true"
+"P5","BC3","incompatible","2","2","1","true"
+"P5","BC4","incompatible","2","2","1","true"
+"P5","BC5","incompatible","2","2","1","true"
+"P5","NB1","compatible","2","2","0","false"
+"P5","NB2","compatible","2","2","0","false"

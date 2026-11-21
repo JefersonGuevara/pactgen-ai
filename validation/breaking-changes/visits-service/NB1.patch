@@ -1,0 +1,18 @@
+diff --git a/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java b/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java
+index ef0fa1a..0edff0a 100644
+--- a/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java
++++ b/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java
+@@ -56,6 +56,13 @@ public class Visit {
+         return this.date;
+     }
+ 
++    public Integer getYear() {
++        if (this.date == null) return null;
++        java.util.Calendar c = java.util.Calendar.getInstance();
++        c.setTime(this.date);
++        return c.get(java.util.Calendar.YEAR);
++    }
++
+     public String getDescription() {
+         return this.description;
+     }

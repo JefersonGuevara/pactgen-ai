@@ -1,0 +1,254 @@
+{
+  "consumer": {
+    "name": "referencia"
+  },
+  "provider": {
+    "name": "account-service"
+  },
+  "interactions": [
+    {
+      "type": "Synchronous/HTTP",
+      "key": "GET /accounts/{name}: cuenta existente",
+      "description": "GET /accounts/{name}: cuenta existente",
+      "providerStates": [
+        {
+          "name": "existe la cuenta ana"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/accounts/ana"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "name": "ana",
+            "lastSeen": "2026-11-18T15:30:00.000+0000",
+            "incomes": [
+              {
+                "title": "Salario",
+                "amount": 3000.0,
+                "currency": "USD",
+                "period": "MONTH",
+                "icon": "wallet"
+              }
+            ],
+            "expenses": [],
+            "saving": {
+              "amount": 1500.0,
+              "currency": "USD",
+              "interest": 3.5,
+              "deposit": true,
+              "capitalization": false
+            },
+            "note": "Ahorro para vacaciones"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "matchingRules": {
+          "body": {
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.lastSeen": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:?\\d{2})"
+                }
+              ]
+            },
+            "$.saving.amount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.saving.currency": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.saving.interest": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.saving.deposit": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.saving.capitalization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.incomes[*].title": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.incomes[*].amount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Synchronous/HTTP",
+      "key": "POST /accounts/: registro válido",
+      "description": "POST /accounts/: registro válido",
+      "providerStates": [
+        {
+          "name": "no hay cuenta ana"
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/accounts/",
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "username": "ana",
+            "password": "secreto123"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "body": {
+          "content": {
+            "name": "ana",
+            "lastSeen": "2026-11-18T15:30:00.000+0000",
+            "saving": {
+              "amount": 0,
+              "currency": "USD",
+              "interest": 0,
+              "deposit": false,
+              "capitalization": false
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "matchingRules": {
+          "body": {
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.lastSeen": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:?\\d{2})"
+                }
+              ]
+            },
+            "$.saving.amount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.saving.currency": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.saving.interest": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.saving.deposit": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.saving.capitalization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    },
+    "pactgen": {
+      "origen": "referencia (OpenAPI)"
+    }
+  }
+}

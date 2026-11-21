@@ -1,0 +1,21 @@
+diff --git a/src/main/java/com/piggymetrics/statistics/domain/timeseries/ItemMetric.java b/src/main/java/com/piggymetrics/statistics/domain/timeseries/ItemMetric.java
+index c5fcae5..2a787b8 100644
+--- a/src/main/java/com/piggymetrics/statistics/domain/timeseries/ItemMetric.java
++++ b/src/main/java/com/piggymetrics/statistics/domain/timeseries/ItemMetric.java
+@@ -3,6 +3,8 @@ package com.piggymetrics.statistics.domain.timeseries;
+ 
+ import com.piggymetrics.statistics.domain.Currency;
+ import com.piggymetrics.statistics.domain.TimePeriod;
++import com.fasterxml.jackson.databind.annotation.JsonSerialize;
++import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+ 
+ import java.math.BigDecimal;
+ 
+@@ -14,6 +16,7 @@ public class ItemMetric {
+ 
+ 	private String title;
+ 
++	@JsonSerialize(using = ToStringSerializer.class)
+ 	private BigDecimal amount;
+ 
+ 	public ItemMetric(String title, BigDecimal amount) {

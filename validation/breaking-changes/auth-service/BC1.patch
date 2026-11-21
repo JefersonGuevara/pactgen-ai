@@ -1,0 +1,30 @@
+diff --git a/src/main/java/com/piggymetrics/auth/controller/UserController.java b/src/main/java/com/piggymetrics/auth/controller/UserController.java
+index 335721a..e900bad 100644
+--- a/src/main/java/com/piggymetrics/auth/controller/UserController.java
++++ b/src/main/java/com/piggymetrics/auth/controller/UserController.java
+@@ -3,6 +3,8 @@ package com.piggymetrics.auth.controller;
+ 
+ import com.piggymetrics.auth.domain.User;
+ import com.piggymetrics.auth.service.UserService;
++import com.fasterxml.jackson.databind.ObjectMapper;
++import java.util.Map;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.web.bind.annotation.RequestBody;
+ import org.springframework.web.bind.annotation.RequestMapping;
+@@ -19,9 +21,14 @@ public class UserController {
+ 	@Autowired
+ 	private UserService userService;
+ 
++	@Autowired
++	private ObjectMapper mapper;
++
+ 	@RequestMapping(value = "/current", method = RequestMethod.GET)
+-	public Principal getUser(Principal principal) {
+-		return principal;
++	public Map<String, Object> getUser(Principal principal) {
++		Map<String, Object> body = mapper.convertValue(principal, Map.class);
++		body.remove("name");
++		return body;
+ 	}
+ 
+ 	@RequestMapping(method = RequestMethod.POST)

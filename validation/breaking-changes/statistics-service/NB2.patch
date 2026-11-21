@@ -1,0 +1,16 @@
+diff --git a/src/main/java/com/piggymetrics/statistics/controller/StatisticsController.java b/src/main/java/com/piggymetrics/statistics/controller/StatisticsController.java
+index b42b826..02796f5 100644
+--- a/src/main/java/com/piggymetrics/statistics/controller/StatisticsController.java
++++ b/src/main/java/com/piggymetrics/statistics/controller/StatisticsController.java
+@@ -17,6 +17,11 @@ public class StatisticsController {
+ 	@Autowired
+ 	private StatisticsService statisticsService;
+ 
++	@RequestMapping(value = "/count", method = RequestMethod.GET)
++	public int countCurrentAccountStatistics(Principal principal) {
++		return statisticsService.findByAccountName(principal.getName()).size();
++	}
++
+ 	@RequestMapping(value = "/current", method = RequestMethod.GET)
+ 	public List<DataPoint> getCurrentAccountStatistics(Principal principal) {
+ 		return statisticsService.findByAccountName(principal.getName());

@@ -1,0 +1,25 @@
+diff --git a/src/main/java/com/piggymetrics/auth/controller/UserController.java b/src/main/java/com/piggymetrics/auth/controller/UserController.java
+index 335721a..b93c33e 100644
+--- a/src/main/java/com/piggymetrics/auth/controller/UserController.java
++++ b/src/main/java/com/piggymetrics/auth/controller/UserController.java
+@@ -13,18 +13,17 @@ import jakarta.validation.Valid;
+ import java.security.Principal;
+ 
+ @RestController
+-@RequestMapping("/users")
+ public class UserController {
+ 
+ 	@Autowired
+ 	private UserService userService;
+ 
+-	@RequestMapping(value = "/current", method = RequestMethod.GET)
++	@RequestMapping(value = "/users/current", method = RequestMethod.GET)
+ 	public Principal getUser(Principal principal) {
+ 		return principal;
+ 	}
+ 
+-	@RequestMapping(method = RequestMethod.POST)
++	@RequestMapping(value = "/accounts", method = RequestMethod.POST)
+ 	public void createUser(@Valid @RequestBody User user) {
+ 		userService.create(user);
+ 	}

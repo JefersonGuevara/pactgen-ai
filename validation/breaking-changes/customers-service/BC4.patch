@@ -1,0 +1,13 @@
+diff --git a/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/web/OwnerRequest.java b/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/web/OwnerRequest.java
+index cf0e457..f7db097 100644
+--- a/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/web/OwnerRequest.java
++++ b/spring-petclinic-customers-service/src/main/java/org/springframework/samples/petclinic/customers/web/OwnerRequest.java
+@@ -9,6 +9,7 @@ public record OwnerRequest(@NotBlank String firstName,
+                            @NotBlank String city,
+                            @NotBlank
+                            @Digits(fraction = 0, integer = 12)
+-                           String telephone
++                           String telephone,
++                           @NotBlank String email
+ ) {
+ }

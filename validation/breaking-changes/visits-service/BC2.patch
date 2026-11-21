@@ -1,0 +1,21 @@
+diff --git a/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java b/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java
+index ef0fa1a..e073322 100644
+--- a/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java
++++ b/spring-petclinic-visits-service/src/main/java/org/springframework/samples/petclinic/visits/model/Visit.java
+@@ -16,6 +16,8 @@
+ package org.springframework.samples.petclinic.visits.model;
+ 
+ import com.fasterxml.jackson.annotation.JsonFormat;
++import com.fasterxml.jackson.databind.annotation.JsonSerialize;
++import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+ import jakarta.persistence.*;
+ import jakarta.validation.constraints.Size;
+ 
+@@ -33,6 +35,7 @@ import java.util.Date;
+ public class Visit {
+ 
+     @Id
++    @JsonSerialize(using = ToStringSerializer.class)
+     @GeneratedValue(strategy = GenerationType.IDENTITY)
+     private Integer id;
+ 

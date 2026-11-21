@@ -1,0 +1,20 @@
+diff --git a/src/main/java/com/piggymetrics/account/controller/AccountController.java b/src/main/java/com/piggymetrics/account/controller/AccountController.java
+index b940adb..6366b88 100644
+--- a/src/main/java/com/piggymetrics/account/controller/AccountController.java
++++ b/src/main/java/com/piggymetrics/account/controller/AccountController.java
+@@ -5,6 +5,7 @@ import com.piggymetrics.account.domain.Account;
+ import com.piggymetrics.account.domain.User;
+ import com.piggymetrics.account.service.AccountService;
+ import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.http.HttpStatus;
+ import org.springframework.web.bind.annotation.*;
+ 
+ import jakarta.validation.Valid;
+@@ -17,6 +18,7 @@ public class AccountController {
+ 	private AccountService accountService;
+ 
+ 	@RequestMapping(path = "/{name}", method = RequestMethod.GET)
++	@ResponseStatus(HttpStatus.NO_CONTENT)
+ 	public Account getAccountByName(@PathVariable String name) {
+ 		return accountService.findByName(name);
+ 	}
