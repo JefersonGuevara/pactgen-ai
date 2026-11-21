@@ -3,7 +3,7 @@
 Herramienta de código abierto que genera **pruebas de contrato Pact V4** (consumidor, JUnit 5 + Pact JVM) para microservicios Spring Boot a partir de **especificaciones OpenAPI 3.x** mediante LLMs. El modelo, sus parámetros y el prompt quedan fijados y archivados, de modo que cada ejecución es reproducible.
 
 > Trabajo Fin de Máster — Máster Universitario en Ingeniería de Software y Sistemas Informáticos (UNIR).
-> **Estado (20 nov 2026):** versión 1.7, piloto sobre el corpus completo (20/20 operaciones, 60/60 pruebas en verde) y verificación de proveedor para los cinco proveedores (línea base: P1 22/22, P2 9/9, P3 12/12, P4 9/9 y P5 5/5; P2, P3 y P5 a ciegas) y 35 mutantes (25/25 incompatibles detectados, 0/10 falsos positivos). Pendiente: congelar la herramienta y experimento.
+> **Estado (21 nov 2026):** versión 1.8 (congelada para el experimento con la etiqueta `experimento-v1`), piloto sobre el corpus completo (20/20 operaciones, 60/60 pruebas en verde) y verificación de proveedor para los cinco proveedores (línea base: P1 22/22, P2 9/9, P3 12/12, P4 9/9 y P5 5/5; P2, P3 y P5 a ciegas) y 35 mutantes (25/25 incompatibles detectados, 0/10 falsos positivos); comandos `validate` y `diff` y plugin Maven probado. Pendiente: experimento (sesiones del 28 nov al 6 dic).
 
 ## Cómo funciona
 
@@ -230,6 +230,7 @@ La línea base de customers-service reveló una inconsistencia del propio petcli
 | 1.5 | 18 nov | **Causa de cada código** en el contexto (descripción de la respuesta) | El modelo usó el 400 de `createPet` para una causa no declarada |
 | 1.6 | 20 nov | Regla ISO 8601 para `date-time`; se conservan las cabeceras exigidas por `securitySchemes`; versiones del entorno y modelo declarado por la API en el manifiesto; opción `--no-filters` | Revisión externa del diseño (18 nov) |
 | 1.7 | 20 nov | Las peticiones con cuerpo declaran `Content-Type: application/json; charset=UTF-8` | Línea base de visits-service: un cuerpo exacto con tildes no coincidía porque el servidor simulado de Pact lo decodificaba como ISO-8859-1 |
+| 1.8 | 21 nov | Comandos **`validate`** (contrato frente al OpenAPI) y **`diff`** (cambios incompatibles entre versiones del OpenAPI); plugin Maven con *goals* `generate`, `validate` y `diff`, probado en *replay* (`examples/plugin-consumer`). **La generación no cambia** | RF-08 y RF-09 (*Must*). No regresión: con `--replay`, los `.java` de P1 (8) y P4 (3) son idénticos a los de la v1.7, y el manifiesto solo cambia en `tool` |
 
 Las respuestas archivadas permiten reprocesar ejecuciones anteriores con una versión nueva sin coste (`--replay`).
 
@@ -240,6 +241,7 @@ pactgen-core/                      núcleo (M1–M4); prompts en src/main/resour
 pactgen-cli/                       CLI
 pactgen-maven-plugin/              plugin Maven
 examples/spike-consumer/           proyecto consumidor donde se generan y ejecutan las pruebas
+examples/plugin-consumer/          ejemplo del plugin Maven (P1 createPet en replay)
 validation/microservices/          OpenAPI del corpus (P1–P5)
 validation/provider-verification/  verificación de contratos contra los proveedores
 validation/breaking-changes/       catálogo de cambios incompatibles (mutantes)
@@ -249,9 +251,8 @@ runs/                              bitácora de ejecuciones de desarrollo
 
 ## Pendiente
 
-- Mutantes: 25 cambios incompatibles (BC1–BC5) y 10 compatibles (NB1–NB2)
-- Congelar la herramienta para el experimento (etiqueta `experimento-v1`)
-- `validate` y `diff` en la CLI; publicación en Pact Broker (RF-10); probar el plugin Maven
+- Experimento con la herramienta congelada (`experimento-v1`): sesiones del 28 nov al 6 dic
+- Publicación en Pact Broker (RF-10)
 
 ## Licencia
 
