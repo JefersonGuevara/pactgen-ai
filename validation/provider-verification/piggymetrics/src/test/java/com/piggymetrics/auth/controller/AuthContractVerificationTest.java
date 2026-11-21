@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willThrow;
 
 /**
@@ -91,6 +92,14 @@ class AuthContractVerificationTest {
     }
 
     private void stub(Expected e) {
+        // Precondiciones de UserServiceImpl.create, sin manejador (-> 500): repository.findById(null) lanza
+        // IllegalArgumentException (Spring Data) y encoder.encode(null), NullPointerException (Spring Security 5.0)
+        willAnswer(inv -> {
+            User u = inv.getArgument(0);
+            if (u.getUsername() == null) throw new IllegalArgumentException("The given id must not be null!");
+            if (u.getPassword() == null) throw new NullPointerException();
+            return null;
+        }).given(users).create(any(User.class));
         if (e.is("POST", "/uaa/users/?") && e.status() == 500 && e.stateMatches(ALREADY_EXISTS)) {
             // UserServiceImpl.create: existing.ifPresent(... throw new IllegalArgumentException(...)), sin manejador
             String username = e.requestBody() != null ? e.requestBody().path("username").asText() : "";

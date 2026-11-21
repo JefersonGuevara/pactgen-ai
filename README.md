@@ -3,7 +3,7 @@
 Herramienta de código abierto que genera **pruebas de contrato Pact V4** (consumidor, JUnit 5 + Pact JVM) para microservicios Spring Boot a partir de **especificaciones OpenAPI 3.x** mediante LLMs. El modelo, sus parámetros y el prompt quedan fijados y archivados, de modo que cada ejecución es reproducible.
 
 > Trabajo Fin de Máster — Máster Universitario en Ingeniería de Software y Sistemas Informáticos (UNIR).
-> **Estado (20 nov 2026):** versión 1.7, piloto sobre el corpus completo (20/20 operaciones, 60/60 pruebas en verde) y verificación de proveedor operativa para customers-service. Pendiente: verificación de P2–P5, mutantes y experimento.
+> **Estado (20 nov 2026):** versión 1.7, piloto sobre el corpus completo (20/20 operaciones, 60/60 pruebas en verde) y verificación de proveedor para los cinco proveedores (línea base: P1 22/22, P3 12/12 a ciegas, P4 9/9 y P5 5/5 a ciegas). Pendiente: línea base a ciegas de P2, mutantes y experimento.
 
 ## Cómo funciona
 
@@ -101,10 +101,11 @@ Los documentos OpenAPI (`validation/microservices/`) se redactaron a partir de l
 
 ## Verificación contra los proveedores
 
-`validation/provider-verification/` verifica los contratos contra el código real de cada proveedor, a nivel de controlador (`@WebMvcTest` + Pact JVM `junit5spring`), con los repositorios simulados mediante datos derivados de cada contrato. Sirve para validar el corpus antes del experimento (línea base) y para medir la detección de cambios incompatibles (mutantes). Ver su README.
+`validation/provider-verification/` verifica los contratos contra el código real de cada proveedor, a nivel de controlador (`@WebMvcTest` + Pact JVM `junit5spring`), con los repositorios simulados mediante datos derivados de cada contrato. piggymetrics (P3–P5, Spring Boot 2.0) se verifica sobre un portado fiel de sus controladores a Spring Boot 3.4.1 (`validation/provider-verification/piggymetrics/`, ver su `NOTICE`). Sirve para validar el corpus antes del experimento (línea base) y para medir la detección de cambios incompatibles (mutantes). Ver su README.
 
 ```powershell
 .\validation\provider-verification\verificar.ps1 -Proveedor P1 -Pacts examples\spike-consumer\target\pacts
+.\validation\provider-verification\verificar.ps1 -Proveedor P3 -Pacts <carpeta temporal> -Ciego   # grupo A: solo totales
 ```
 
 La línea base de customers-service reveló una inconsistencia del propio petclinic (`POST /owners/{id}/pets` serializa `birthDate` con fecha y hora; las lecturas, solo con fecha) y motivó las versiones 1.4 y 1.5.
@@ -146,7 +147,7 @@ runs/                              bitácora de ejecuciones de desarrollo
 
 ## Pendiente
 
-- Verificación de proveedor de P2 (visits-service) y de P3–P5 (piggymetrics, Spring Boot 2.0)
+- Línea base a ciegas de P2 (contratos generados en carpeta temporal)
 - Mutantes: 25 cambios incompatibles (BC1–BC5) y 10 compatibles (NB1–NB2)
 - Congelar la herramienta para el experimento (etiqueta `experimento-v1`)
 - `validate` y `diff` en la CLI; publicación en Pact Broker (RF-10); probar el plugin Maven

@@ -141,7 +141,12 @@ public final class ContractFixtures {
             if (c == LocalDateTime.class) return LocalDateTime.parse(v.asText().replaceAll("(Z|[+-]\\d{2}:?\\d{2})$", ""));
             if (c == Instant.class) return parseInstant(v.asText());
             if (Date.class.isAssignableFrom(c)) return date(v.asText(), owner);
-            if (c.isEnum()) return enumValue(c, v.asText());
+            if (c.isEnum()) {
+                // Un campo enum solo puede contener constantes del enum: si el ejemplo del contrato no es una de
+                // ellas, se usa la primera y la regla del contrato decide (tipo: pasa; valor exacto: falla).
+                Object e = enumValue(c, v.asText());
+                return e != null ? e : c.getEnumConstants()[0];
+            }
             if (Collection.class.isAssignableFrom(c)) {
                 Type elem = typeArg(type, 0);
                 Collection<Object> col = Set.class.isAssignableFrom(c) ? new LinkedHashSet<>() : new ArrayList<>();

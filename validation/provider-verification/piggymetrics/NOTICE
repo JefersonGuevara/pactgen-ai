@@ -78,6 +78,9 @@ espera ese código y su estado lo describe:
   - POST /accounts/ -> 400 si la cuenta ya existe (Assert.isNull en AccountServiceImpl.create)
   - PUT /accounts/current -> 400 si la cuenta no existe (Assert.notNull en AccountServiceImpl.saveChanges)
   - POST /uaa/users -> 500 si el usuario ya existe (IllegalArgumentException sin manejador en UserServiceImpl.create)
+Además, el simulador de UserService reproduce siempre las precondiciones de UserServiceImpl.create, que no tienen
+manejador (-> 500): sin username, repository.findById(null) lanza IllegalArgumentException (Spring Data); sin
+password, encoder.encode(null) lanza NullPointerException (Spring Security 5.0). domain.User no tiene Bean Validation.
 Los 400 por datos inválidos los produce la validación real (@Valid), no el simulador.
 
 
