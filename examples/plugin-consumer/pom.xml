@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Ejemplo del plugin Maven de PactGen-AI (RF-09). Regenera en modo replay (sin clave ni coste) las pruebas de
+  consumidor de customers-service (P1) a partir de la carpeta archivada más reciente en runs/, y `mvn test` las
+  ejecuta y escribe el contrato en target/pacts. `mvn verify` además lo valida frente al OpenAPI (pactgen:validate).
+  Requiere el plugin instalado: `mvn -B install` en la raíz de pactgen-ai.
+  Es independiente del build de la herramienta (no es un módulo del pom padre).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>dev.pactgen.examples</groupId>
+  <artifactId>plugin-consumer</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <pact.version>4.6.17</pact.version>
+    <pactgen.version>0.1.0-SNAPSHOT</pactgen.version>
+    <!-- Corpus de PactGen-AI (rutas relativas a este ejemplo) -->
+    <corpus.dir>${project.basedir}/../..</corpus.dir>
+  </properties>
+
+  <!-- Pact JVM 4.6.17 arrastra junit-jupiter-api 5.9.2: se alinean Jupiter y Platform con el BOM -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.11.3</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>au.com.dius.pact.consumer</groupId>
+      <artifactId>junit5</artifactId>
+      <version>${pact.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-commons</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>dev.pactgen</groupId>
+        <artifactId>pactgen-maven-plugin</artifactId>
+        <version>${pactgen.version}</version>
+        <configuration>
+          <openapi>${corpus.dir}/validation/microservices/customers-service/openapi.yaml</openapi>
+        </configuration>
+        <executions>
+          <!-- generate-test-sources: escribe target/generated-test-sources/pactgen/src/test/java/pactgen/generated -->
+          <execution>
+            <id>generar</id>
+            <goals><goal>generate</goal></goals>
+            <configuration>
+              <consumer>api-gateway</consumer>
+              <provider>customers-service</provider>
+              <!-- La carpeta más reciente de customers-service en runs/ solo archivó createPet -->
+              <include><operationId>createPet</operationId></include>
+              <replay>${corpus.dir}/runs/2026-11-18_21-53-22_customers-service_haiku-4-5/raw</replay>
+              <!-- Con la clave en ANTHROPIC_API_KEY, quitando <replay>, usaría el modelo de referencia:
+              <model>claude-haiku-4-5-20251001</model>
+              <promptVersion>v1.1</promptVersion> -->
+            </configuration>
+          </execution>
+          <!-- verify: comprueba el contrato de target/pacts frente al OpenAPI -->
+          <execution>
+            <id>validar</id>
+            <goals><goal>validate</goal></goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <systemPropertyVariables>
+            <pact.rootDir>${project.build.directory}/pacts</pact.rootDir>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -119,25 +119,73 @@ El código de salida es 0 sin incompatibles, 1 con alguno y 2 si no se puede lee
 
 Las pruebas de `OpenApiDiffTest` reproducen con OpenAPI sintéticos los cinco tipos BC y los dos NB de la Tabla 8. La lista prerregistrada de mutantes no se reclasifica con `diff`.
 
-### Plugin Maven (en el `pom.xml` del consumidor)
+### Plugin Maven (RF-09)
+
+El plugin ofrece tres *goals*, que delegan en el mismo núcleo que la CLI:
+
+| *Goal* | Fase por defecto | Equivale a |
+|---|---|---|
+| `pactgen:generate` | `generate-test-sources` | `pactgen generate`. Añade las pruebas generadas a las fuentes de prueba y falla el build si alguna operación no se genera |
+| `pactgen:validate` | `verify` | `pactgen validate` sobre `target/pacts`. Falla el build si hay errores (`failOnError`) |
+| `pactgen:diff` | — (no necesita proyecto) | `pactgen diff`. Falla el build si hay incompatibles (`failOnBreaking`) |
+
+Configuración real del ejemplo `examples/plugin-consumer/pom.xml`, que regenera P1 en modo *replay*, sin clave ni coste. Primero hay que instalar el plugin con `mvn -B install` en la raíz del repositorio. Después, `mvn -f examples/plugin-consumer/pom.xml verify` genera las pruebas, las ejecuta y valida el contrato.
 
 ```xml
 <plugin>
   <groupId>dev.pactgen</groupId>
   <artifactId>pactgen-maven-plugin</artifactId>
   <version>0.1.0-SNAPSHOT</version>
+  <configuration>
+    <openapi>${corpus.dir}/validation/microservices/customers-service/openapi.yaml</openapi>
+  </configuration>
   <executions>
     <execution>
+      <id>generar</id>
       <goals><goal>generate</goal></goals>
       <configuration>
-        <openapi>${project.basedir}/contracts/customers-service.yaml</openapi>
         <consumer>api-gateway</consumer>
         <provider>customers-service</provider>
+        <include><operationId>createPet</operationId></include>
+        <replay>${corpus.dir}/runs/2026-11-18_21-53-22_customers-service_haiku-4-5/raw</replay>
       </configuration>
+    </execution>
+    <execution>
+      <id>validar</id>
+      <goals><goal>validate</goal></goals>
     </execution>
   </executions>
 </plugin>
 ```
+
+Parámetros de `generate`, con los mismos valores por defecto que la CLI:
+
+| Parámetro | Por defecto |
+|---|---|
+| `openapi`, `consumer`, `provider` | obligatorios |
+| `include` | todas las operaciones |
+| `outDir` | `target/generated-test-sources/pactgen` |
+| `testPackage` | `pactgen.generated` |
+| `llmProvider` | `anthropic` |
+| `model` | `claude-haiku-4-5-20251001` |
+| `temperature`, `maxTokens` | 0.2, 4096 |
+| `baseUrl`, `apiKeyEnv` | según el proveedor, `ANTHROPIC_API_KEY` |
+| `replay` | — |
+| `maxRepairs` | 2 |
+| `promptVersion` | `v1.1` |
+| `tokenBudget` | 6000 |
+| `noDedupe`, `noFilters` | `false` |
+| `skip` | `false` |
+
+Cada parámetro admite también la propiedad `-Dpactgen.<nombre>`.
+
+`diff` se ejecuta sin proyecto:
+
+```bash
+mvn dev.pactgen:pactgen-maven-plugin:0.1.0-SNAPSHOT:diff -Dpactgen.old=v1.yaml -Dpactgen.new=v2.yaml
+```
+
+Comprobación del 21 nov: con las mismas respuestas crudas, el `.java` que genera el plugin es idéntico byte a byte al de la CLI (`CreatePetPactTest.java`, SHA-256 `6f5a42d7…`). `mvn verify` da 3/3 pruebas en verde y `validate` 3/3 OK.
 
 ## Corpus de evaluación
 
